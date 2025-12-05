@@ -5,13 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.ListaAlimentosActivity">
+    tools:context=".ui.RecipesFragment">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:elevation="0dp"
         app:elevation="0dp">
 
         <LinearLayout
@@ -19,8 +19,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingStart="16dp"
-            android:paddingEnd="16dp"
             android:paddingTop="8dp"
+            android:paddingEnd="16dp"
             android:paddingBottom="8dp">
 
             <RelativeLayout
@@ -29,106 +29,91 @@
                 android:layout_marginBottom="16dp">
 
                 <ImageView
-                    android:id="@+id/btn_back"
+                    android:id="@+id/btn_back_recipes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_back"
-                    android:padding="8dp"
                     android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"/>
+                    android:layout_centerVertical="true"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_back" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Food List"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
+                    android:layout_centerInParent="true"
+                    android:text="Suggested Recipes"
                     android:textColor="@android:color/black"
-                    android:layout_centerInParent="true"/>
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
 
                 <ImageView
                     android:id="@+id/iv_profile"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:src="@drawable/ic_user"
-                    android:scaleType="centerCrop"
                     android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"/>
+                    android:layout_centerVertical="true"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_user" />
+
             </RelativeLayout>
 
-            <androidx.cardview.widget.CardView
+            <EditText
+                android:id="@+id/et_search_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                android:background="@color/light_gray">
-
-                <EditText
-                    android:id="@+id/et_search"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Search recipes or foods..."
-                    android:drawableStart="@drawable/ic_search"
-                    android:drawablePadding="8dp"
-                    android:padding="12dp"
-                    android:background="@android:color/transparent"
-                    android:inputType="text"
-                    android:imeOptions="actionSearch"/>
-            </androidx.cardview.widget.CardView>
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="20dp"
+                android:autofillHints="name"
+                android:background="@drawable/bg_rounded_search_bar"
+                android:drawableStart="@drawable/ic_search"
+                android:drawablePadding="8dp"
+                android:hint="Write here to search recipes..."
+                android:inputType="text"
+                android:padding="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/btn_favorites"
+                    android:id="@+id/btn_favorites_recipes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Favorites"
-                    android:textColor="@android:color/white"
+                    android:layout_marginEnd="12dp"
                     android:backgroundTint="@color/colorPrimary"
-                    app:cornerRadius="10dp"
                     android:drawableStart="@drawable/ic_favorite"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
-                    android:layout_marginEnd="12dp"/>
+                    android:text="Favorites"
+                    android:textColor="@android:color/white" />
 
                 <Button
-                    android:id="@+id/btn_filter"
+                    android:id="@+id/btn_filter_recipes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Filter"
-                    android:textColor="@android:color/black"
-                    android:backgroundTint="@color/light_gray_button"
-                    app:cornerRadius="10dp"
+                    android:backgroundTint="@color/colorPrimary"
                     android:drawableStart="@drawable/ic_filter"
                     android:paddingStart="16dp"
-                    android:paddingEnd="16dp"/>
+                    android:paddingEnd="16dp"
+                    android:text="Filter"
+                    android:textColor="@android:color/white" />
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_food_list"
+        android:id="@+id/rv_recipes_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:listitem="@layout/item_alimento"
+        tools:listitem="@layout/item_recipe_card_large"
         android:clipToPadding="false"
         android:paddingBottom="80dp"/>
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="@android:color/white"
-        app:labelVisibilityMode="labeled"
-        app:menu="@drawable/bottom_nav_menu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

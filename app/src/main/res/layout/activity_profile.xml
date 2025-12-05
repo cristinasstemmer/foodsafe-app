@@ -104,9 +104,26 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <Button style="@style/ChipStyle.Vegan" android:text="❤️ Vegan" android:layout_marginEnd="8dp" />
-                    <Button style="@style/ChipStyle.GlutenFree" android:text="⚙️ Gluten-free" android:layout_marginEnd="8dp" />
-                    <Button style="@style/ChipStyle.LactoseFree" android:text="Lactose-free" />
+                    <Button style="@style/ChipStyle.Vegan"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Vegan"
+                        android:layout_marginEnd="8dp" />
+
+                    <Button style="@style/ChipStyle.GlutenFree"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Gluten-free"
+                        android:layout_marginEnd="8dp" />
+
+                    <Button style="@style/ChipStyle.LactoseFree"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Lactose-free"
+                        android:layout_marginEnd="8dp"/>
                 </LinearLayout>
             </LinearLayout>
 
@@ -147,8 +164,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-                    <Button style="@style/ChipStyle.AllergyHigh" android:text="Peanut — High" android:layout_marginEnd="8dp" />
-                    <Button style="@style/ChipStyle.AllergyMedium" android:text="Shellfish — Medium" />
+                    <Button style="@style/ChipStyle.AllergyHigh"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Peanut — High"
+                        android:layout_marginEnd="8dp" />
+                    <Button style="@style/ChipStyle.AllergyMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Shellfish — Medium" />
                 </LinearLayout>
             </LinearLayout>
 

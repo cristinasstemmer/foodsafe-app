@@ -34,7 +34,12 @@
             android:theme="@style/Theme.FoodSafe" />
 
         <activity
-            android:name=".ui.ListaAlimentosActivity"
+            android:name=".MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FoodSafe" />
+
+        <activity
+            android:name=".ui.ProfileActivity"
             android:exported="false"
             android:theme="@style/Theme.FoodSafe" />
 

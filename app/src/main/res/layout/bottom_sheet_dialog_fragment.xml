@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    app:layout_behavior="@string/bottom_sheet_behavior">
+
+    <TextView
+        android:id="@+id/tv_modal_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add New Food"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/et_food_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Food Name (e.g., Apple, Milk, Pasta)"
+        android:inputType="textCapWords"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"
+        android:autofillHints="name" />
+
+    <EditText
+        android:id="@+id/et_brand"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Brand (Optional)"
+        android:inputType="textCapWords"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"
+        android:autofillHints="organization" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose how to identify the food:"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp"/>
+
+    <RadioGroup
+        android:id="@+id/rg_add_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="24dp">
+
+        <RadioButton
+            android:id="@+id/rb_scan_barcode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Scan Barcode / QR Code"
+            android:paddingVertical="8dp"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/rb_manual_entry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Manual Entry of Ingredients/Data"
+            android:paddingVertical="8dp"/>
+
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btn_continue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Continue"
+        android:padding="12dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:textStyle="bold" />
+
+</LinearLayout>

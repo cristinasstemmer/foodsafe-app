@@ -10,11 +10,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.foodsafe.foodsafeapp.R; // Ajuste o pacote conforme necessário
+import com.foodsafe.foodsafeapp.R;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    // Declaração das Views interativas
     private ImageView ivBack;
     private TextView tvAddAllergy;
     private LinearLayout llChangePassword;
@@ -23,16 +22,12 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Certifique-se de que o nome do layout corresponde ao seu XML (activity_profile.xml)
         setContentView(R.layout.activity_profile);
 
-        // 1. Inicializa as Views
         initializeViews();
 
-        // 2. Configura os Listeners de Clique
         setupClickListeners();
 
-        // 3. Carrega os dados do perfil (Nome, Email, etc.)
         loadProfileData();
     }
 
@@ -49,16 +44,13 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        // Ação de Voltar
         ivBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navega de volta para a Activity anterior
                 finish();
             }
         });
 
-        // Ação para Adicionar Alergia
         tvAddAllergy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,7 +59,6 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        // Ação para Mudar Senha
         llChangePassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,7 +67,6 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-        // Ação de Logout
         tvSignOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

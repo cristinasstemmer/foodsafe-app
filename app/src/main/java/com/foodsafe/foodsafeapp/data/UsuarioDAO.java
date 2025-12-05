@@ -1,5 +1,6 @@
 package com.foodsafe.foodsafeapp.data;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -18,6 +19,9 @@ public interface UsuarioDAO {
 
     @Query("SELECT restricoes FROM usuario WHERE id = :idUsuario")
     String obterRestricoes(int idUsuario);
+
+    @Query("SELECT * FROM usuario LIMIT 1")
+    LiveData<Usuario> getLoggedInUser();
 
     @Update
     void updateUsuario(Usuario usuario);

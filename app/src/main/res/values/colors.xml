@@ -13,4 +13,12 @@
 
     <color name="white">#FFFFFF</color>
     <color name="black">#919191</color>
+
+    <color name="red_accent">#E53935</color>
+    <color name="red_light">#FFCDD2</color>
+    <color name="vegan_chip_background">#E8F5E9</color>
+    <color name="gluten_chip_background">#FFFDE7</color>
+    <color name="lactose_chip_background">#E3F2FD</color>
+    <color name="allergy_high_background">#FFEBEE</color>
+    <color name="allergy_medium_background">#FFF8E1</color>
 </resources>

@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.foodsafe.foodsafeapp.MainActivity;
 import com.foodsafe.foodsafeapp.R;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -39,7 +40,8 @@ public class LoginActivity extends AppCompatActivity {
 
             Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
 
-            startActivity(new Intent(this, ListaAlimentosActivity.class));
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
             finish();
         });
 
