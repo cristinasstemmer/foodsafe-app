@@ -37,7 +37,7 @@ public class FavoritosActivity extends AppCompatActivity {
             List<String> nomes = new ArrayList<>();
 
             for (Favorito f : favs) {
-                Alimento a = alimentoController.buscarPorId(f.getId_alimento());
+                Alimento a = alimentoController.buscarPorId(f.getIdAlimento());
                 if (a != null) {
                     nomes.add(a.getNome() + " (Alergênicos: " + a.getContem_alergenos() + ")");
                 }

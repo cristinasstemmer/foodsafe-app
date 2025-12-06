@@ -1,76 +1,94 @@
 package com.foodsafe.foodsafeapp.ui;
 
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.model.Alimento;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class AlimentoAdapter extends RecyclerView.Adapter<AlimentoAdapter.AlimentoViewHolder> {
+public class AlimentoAdapter extends RecyclerView.Adapter<AlimentoAdapter.ViewHolder> {
 
-    private final Context context;
-    private final List<Alimento> listaAlimentos;
+    private List<Alimento> lista = new ArrayList<>();
+    private final AlimentoViewModel viewModel;
+    private final LifecycleOwner lifecycleOwner;
 
-    public AlimentoAdapter(Context context, List<Alimento> listaAlimentos) {
-        this.context = context;
-        this.listaAlimentos = listaAlimentos;
+    public AlimentoAdapter(AlimentoViewModel vm, LifecycleOwner owner) {
+        this.viewModel = vm;
+        this.lifecycleOwner = owner;
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void setLista(List<Alimento> lista) {
+        this.lista = lista;
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
-    public AlimentoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_alimento, parent, false);
-        return new AlimentoViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_alimento, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AlimentoViewHolder holder, int position) {
-        Alimento alimentoAtual = listaAlimentos.get(position);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        holder.tvNome.setText(alimentoAtual.getNome());
+        Alimento alimento = lista.get(position);
 
-        String alergenos = alimentoAtual.getContem_alergenos();
-        holder.tvAlergenos.setText(
-                alergenos.isEmpty()
-                        ? "Alergênicos: Nenhum"
-                        : "Alergênicos: " + alergenos
-        );
+        holder.txtNome.setText(alimento.getNome());
+        holder.txtDesc.setText(alimento.getDescricao());
 
-        holder.itemView.setOnClickListener(v ->
-                Toast.makeText(context, alimentoAtual.getNome(), Toast.LENGTH_SHORT).show()
-        );
+        viewModel.isFavorito(alimento.getId())
+                .observe(lifecycleOwner, favorito -> {
 
-        holder.ivFavoritar.setOnClickListener(v ->
-                Toast.makeText(context,
-                        alimentoAtual.getNome() + " favoritado!",
-                        Toast.LENGTH_SHORT).show()
-        );
+                    if (favorito != null) {
+                        holder.btnFav.setImageResource(R.drawable.ic_favorite_filled);
+                        holder.btnFav.setTag("favorited");
+                    } else {
+                        holder.btnFav.setImageResource(R.drawable.ic_favorite);
+                        holder.btnFav.setTag("not");
+                    }
+                });
+
+        holder.btnFav.setOnClickListener(v -> {
+
+            String state = (String) holder.btnFav.getTag();
+
+            if ("favorited".equals(state)) {
+                viewModel.desfavoritar(alimento);
+            } else {
+                viewModel.favoritar(alimento);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return listaAlimentos.size();
+        return lista.size();
     }
 
-    public static class AlimentoViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNome, tvAlergenos;
-        ImageView ivFavoritar;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public AlimentoViewHolder(@NonNull View itemView) {
+        TextView txtNome, txtDesc;
+        ImageView btnFav;
+
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvNome = itemView.findViewById(R.id.tv_alimento_nome);
-            tvAlergenos = itemView.findViewById(R.id.tv_alimento_alergenos);
-            ivFavoritar = itemView.findViewById(R.id.iv_favoritar);
+
+            txtNome = itemView.findViewById(R.id.tv_alimento_nome);
+            btnFav = itemView.findViewById(R.id.iv_favoritar);
         }
     }
 }

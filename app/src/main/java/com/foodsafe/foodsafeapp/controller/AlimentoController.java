@@ -2,6 +2,8 @@ package com.foodsafe.foodsafeapp.controller;
 
 import android.content.Context;
 
+import androidx.lifecycle.LiveData;
+
 import com.foodsafe.foodsafeapp.data.AppDatabase;
 import com.foodsafe.foodsafeapp.data.AlimentoDAO;
 import com.foodsafe.foodsafeapp.model.Alimento;
@@ -17,10 +19,10 @@ public class AlimentoController {
     }
 
     public void cadastrar(Alimento a) {
-        dao.insertAlimento(a);
+        dao.inserir(a);
     }
 
-    public List<Alimento> listar() {
+    public LiveData<List<Alimento>> listar() {
         return dao.listarTodosAlimentos();
     }
 

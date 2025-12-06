@@ -12,7 +12,7 @@ import com.foodsafe.foodsafeapp.model.Favorito;
 import com.foodsafe.foodsafeapp.model.Receita;
 import com.foodsafe.foodsafeapp.model.Usuario;
 
-@Database(entities = {Usuario.class, Alimento.class, Receita.class, Favorito.class}, version = 1, exportSchema = false)
+@Database(entities = {Usuario.class, Alimento.class, Receita.class, Favorito.class}, version = 4, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDAO usuarioDAO();
@@ -31,8 +31,7 @@ public abstract class AppDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                                    AppDatabase.class, DATABASE_NAME)
+                    INSTANCE = Room.databaseBuilder(context, AppDatabase.class, "foodsafe.db")
                             .fallbackToDestructiveMigration()
                             .build();
                 }

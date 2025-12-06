@@ -11,10 +11,14 @@ public class Alimento {
 
     private String nome;
     private String contem_alergenos;
+    private String descricao;
+    private String imagemUri; // pode ser URL ou URI local
 
-    public Alimento(String nome, String contem_alergenos) {
+    public Alimento(String nome, String contem_alergenos, String descricao, String imagemUri) {
         this.nome = nome;
         this.contem_alergenos = contem_alergenos;
+        this.descricao = descricao;
+        this.imagemUri = imagemUri;
     }
 
     public int getId() { return id; }
@@ -25,4 +29,10 @@ public class Alimento {
 
     public String getContem_alergenos() { return contem_alergenos; }
     public void setContem_alergenos(String contem_alergenos) { this.contem_alergenos = contem_alergenos; }
+
+    public String getDescricao() { return descricao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
+
+    public String getImagemUri() { return imagemUri; }
+    public void setImagemUri(String imagemUri) { this.imagemUri = imagemUri; }
 }

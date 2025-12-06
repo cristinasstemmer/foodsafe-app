@@ -1,0 +1,85 @@
+package com.foodsafe.foodsafeapp.ui;
+
+import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
+import com.foodsafe.foodsafeapp.data.AppDatabase;
+import com.foodsafe.foodsafeapp.model.Alimento;
+import com.foodsafe.foodsafeapp.model.Favorito;
+
+import java.util.List;
+
+public class AlimentoViewModel extends AndroidViewModel {
+
+    private final LiveData<List<Alimento>> alimentos;
+    private final AppDatabase db;
+    private final int usuarioId;
+
+    public AlimentoViewModel(@NonNull Application application) {
+        super(application);
+
+        db = AppDatabase.getInstance(application);
+
+        SharedPreferences prefs =
+                application.getSharedPreferences("FoodSafePrefs", Context.MODE_PRIVATE);
+
+        usuarioId = prefs.getInt("USER_ID", -1);
+
+        alimentos = db.alimentoDAO().listarTodosAlimentos();
+    }
+
+    public LiveData<List<Alimento>> getAllAlimentos() {
+        return alimentos;
+    }
+
+    public int getUsuarioId() {
+        return usuarioId;
+    }
+
+    public void favoritar(Alimento alimento) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            Favorito fav = new Favorito(usuarioId, alimento.getId());
+            db.favoritoDAO().adicionarFavorito(fav);
+        });
+    }
+
+    public void desfavoritar(Alimento alimento) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            db.favoritoDAO().removerFavorito(usuarioId, alimento.getId());
+        });
+    }
+
+    public LiveData<List<Alimento>> getFavoritos(int idUsuario) {
+        MutableLiveData<List<Alimento>> favoritos = new MutableLiveData<>();
+
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+
+            List<Favorito> listaFavoritos = db.favoritoDAO().listarPorUsuario(idUsuario);
+
+            List<Integer> ids = listaFavoritos.stream()
+                    .map(Favorito::getIdAlimento)
+                    .toList();
+
+            if (ids.isEmpty()) {
+                favoritos.postValue(List.of());
+                return;
+            }
+
+            List<Alimento> alimentosFav = db.alimentoDAO().buscarPorIds(ids);
+
+            favoritos.postValue(alimentosFav);
+        });
+
+        return favoritos;
+    }
+
+    public LiveData<Favorito> isFavorito(int alimentoId) {
+        return db.favoritoDAO().isFavorito(usuarioId, alimentoId);
+    }
+}
