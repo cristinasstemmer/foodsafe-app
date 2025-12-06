@@ -13,17 +13,14 @@ import java.util.List;
 public interface FavoritoDAO {
 
     @Insert
-    void adicionarFavorito(Favorito favorito);
+    void insert(Favorito favorito);
 
     @Query("DELETE FROM Favorito WHERE idUsuario = :idUsuario AND idAlimento = :idAlimento")
-    void removerFavorito(int idUsuario, int idAlimento);
+    void delete(int idUsuario, int idAlimento);
 
     @Query("SELECT * FROM Favorito WHERE idUsuario = :idUsuario")
-    List<Favorito> listarFavoritos(int idUsuario);
+    List<Favorito> getByUserId(int idUsuario);
 
     @Query("SELECT * FROM Favorito WHERE idUsuario = :idUsuario AND idAlimento = :idAlimento LIMIT 1")
-    LiveData<Favorito> isFavorito(int idUsuario, int idAlimento);
-
-    @Query("SELECT * FROM favorito WHERE idUsuario = :idUsuario")
-    List<Favorito> listarPorUsuario(int idUsuario);
+    LiveData<Favorito> isFavorite(int idUsuario, int idAlimento);
 }

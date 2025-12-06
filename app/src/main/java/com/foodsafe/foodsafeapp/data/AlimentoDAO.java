@@ -5,6 +5,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.foodsafe.foodsafeapp.model.Alimento;
 
@@ -14,20 +15,29 @@ import java.util.List;
 public interface AlimentoDAO {
 
     @Insert
-    void inserir(Alimento alimento);
+    void insert(Alimento alimento);
+
+    @Insert
+    void insertAll(List<Alimento> alimentos);
+
+    @Update
+    void update(Alimento alimento);
 
     @Query("SELECT * FROM Alimento ORDER BY nome ASC")
-    LiveData<List<Alimento>> listarTodosAlimentos();
+    LiveData<List<Alimento>> getAllAlimentos();
+
+    @Query("SELECT * FROM Alimento ORDER BY nome ASC")
+    List<Alimento> getAllAlimentosSync();
 
     @Query("SELECT * FROM Alimento WHERE id = :id")
-    Alimento buscarAlimentoPorId(int id);
+    Alimento getAlimentoById(int id);
 
-    @Query("SELECT * FROM Alimento WHERE contem_alergenos LIKE '%' || :restricao || '%'")
-    List<Alimento> buscarAlimentosPorRestricao(String restricao);
+    @Query("SELECT * FROM Alimento WHERE contem_alergenos LIKE '%' || :restriction || '%'")
+    List<Alimento> getAlimentosByRestriction(String restriction);
 
     @Delete
-    void deletar(Alimento alimento);
+    void delete(Alimento alimento);
 
     @Query("SELECT * FROM alimento WHERE id IN (:ids)")
-    List<Alimento> buscarPorIds(List<Integer> ids);
+    List<Alimento> getByIds(List<Integer> ids);
 }

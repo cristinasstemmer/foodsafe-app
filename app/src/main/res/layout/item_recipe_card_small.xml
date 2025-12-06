@@ -14,13 +14,13 @@
 
         <ImageView
             android:id="@+id/iv_recipe_image_small"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_width="161dp"
+            android:layout_height="91dp"
+            android:contentDescription="Imagem da receita pequena"
             android:scaleType="centerCrop"
             android:src="@android:drawable/ic_menu_gallery"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:contentDescription="Imagem da receita pequena" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tv_recipe_title_small"

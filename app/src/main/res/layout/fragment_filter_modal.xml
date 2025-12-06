@@ -42,7 +42,11 @@
 
     </RelativeLayout>
 
-    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#EEEEEE" android:layout_marginBottom="16dp"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#EEEEEE"
+        android:layout_marginBottom="16dp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -58,8 +62,6 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginBottom="24dp">
-        <Button style="@style/ChipStyle.Selected" android:id="@+id/chip_vegan" android:text="Vegan" android:layout_marginEnd="8dp" tools:ignore="HardcodedText" />
-        <Button style="@style/ChipStyle" android:id="@+id/chip_gluten_free" android:text="Gluten-free" tools:ignore="HardcodedText" />
     </LinearLayout>
 
     <LinearLayout
@@ -69,19 +71,18 @@
 
         <Button
             android:id="@+id/btn_clear_filters"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="Clear"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_marginEnd="8dp"/>
 
         <Button
             android:id="@+id/btn_apply_filters"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="Apply filters"
+            style="@style/Widget.MaterialComponents.Button"
             android:backgroundTint="@color/colorPrimary"/>
 
     </LinearLayout>

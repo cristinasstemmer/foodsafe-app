@@ -14,6 +14,9 @@ public interface UsuarioDAO {
     @Insert
     void insertUsuario(Usuario usuario);
 
+    @Query("SELECT * FROM usuario WHERE email = :email LIMIT 1")
+    Usuario getUserByEmail(String email);
+
     @Query("SELECT * FROM usuario WHERE email = :email AND senha = :senha LIMIT 1")
     Usuario login(String email, String senha);
 
@@ -21,7 +24,7 @@ public interface UsuarioDAO {
     String obterRestricoes(int idUsuario);
 
     @Query("SELECT * FROM usuario LIMIT 1")
-    LiveData<Usuario> getLoggedInUser();
+    Usuario getLoggedInUser();
 
     @Update
     void updateUsuario(Usuario usuario);

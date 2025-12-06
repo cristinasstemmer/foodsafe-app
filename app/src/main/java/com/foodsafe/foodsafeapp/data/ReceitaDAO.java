@@ -13,20 +13,26 @@ import java.util.List;
 public interface ReceitaDAO {
 
     @Insert
-    void insertReceita(Receita receita);
+    void insert(Receita receita);
+
+    @Insert
+    void insertAll(List<Receita> receitas);
 
     @Update
-    void updateReceita(Receita receita);
+    void update(Receita receita);
 
     @Query("SELECT * FROM receitas")
-    List<Receita> getAllReceitas();
+    List<Receita> getAll();
 
     @Query("SELECT * FROM receitas WHERE id = :id")
-    Receita getReceitaById(int id);
+    Receita getById(int id);
 
     @Query("DELETE FROM receitas WHERE id = :id")
-    void deleteReceita(int id);
+    void deleteById(int id);
 
-    @Query("SELECT * FROM receitas WHERE restricoes LIKE '%' || :restricao || '%'")
-    List<Receita> getReceitasPorRestricao(String restricao);
+    @Query("SELECT * FROM receitas WHERE restricoes LIKE '%' || :restriction || '%'")
+    List<Receita> getByRestriction(String restriction);
+
+    @Query("SELECT * FROM receitas WHERE id IN (:ids)")
+    List<Receita> getByIds(List<Integer> ids);
 }

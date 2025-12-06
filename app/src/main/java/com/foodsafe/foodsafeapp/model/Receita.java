@@ -14,13 +14,15 @@ public class Receita {
     private String ingredientes;
     private String modoPreparo;
     private String restricoes;
+    private String imagemUrl;
 
-    public Receita(String nome, String descricao, String ingredientes, String modoPreparo, String restricoes) {
+    public Receita(String nome, String descricao, String ingredientes, String modoPreparo, String restricoes, String imagemUrl) {
         this.nome = nome;
         this.descricao = descricao;
         this.ingredientes = ingredientes;
         this.modoPreparo = modoPreparo;
         this.restricoes = restricoes;
+        this.imagemUrl = imagemUrl;
     }
 
     // Getters e Setters
@@ -71,5 +73,13 @@ public class Receita {
 
     public void setRestricoes(String restricoes) {
         this.restricoes = restricoes;
+    }
+
+    public String getImagemUrl() {
+        return imagemUrl;
+    }
+
+    public void setImagemUrl(String imagemUrl) {
+        this.imagemUrl = imagemUrl;
     }
 }

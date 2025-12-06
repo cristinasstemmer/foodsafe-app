@@ -17,15 +17,19 @@ public class FavoritoController {
         favoritoDAO = db.favoritoDAO();
     }
 
-    public void adicionar(int idUsuario, int idAlimento) {
-        favoritoDAO.adicionarFavorito(new Favorito(idUsuario, idAlimento));
+    public void insert(int idUsuario, int idAlimento) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            favoritoDAO.insert(new Favorito(idUsuario, idAlimento));
+        });
     }
 
-    public void remover(int idUsuario, int idAlimento) {
-        favoritoDAO.removerFavorito(idUsuario, idAlimento);
+    public void delete(int idUsuario, int idAlimento) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            favoritoDAO.delete(idUsuario, idAlimento);
+        });
     }
 
-    public List<Favorito> listarFavoritos(int idUsuario) {
-        return favoritoDAO.listarFavoritos(idUsuario);
+    public List<Favorito> getByUserId(int idUsuario) {
+        return favoritoDAO.getByUserId(idUsuario);
     }
 }

@@ -1,17 +1,17 @@
 package com.foodsafe.foodsafeapp.ui;
 
-import android.content.Intent;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,18 +19,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.data.AppDatabase;
+import com.foodsafe.foodsafeapp.model.Alimento;
 
 public class FoodListFragment extends Fragment {
 
     private RecyclerView rvFoodItems;
-    private EditText etSearchBar;
-    private ImageView ivProfile;
-    private Button btnAdd;
-
+    private SearchView svSearchBar;
+    private TextView tvFavoritesTitle;
     private AlimentoAdapter adapter;
     private AlimentoViewModel alimentoViewModel;
-    private Button btn_favorites;
-    private boolean mostrandoFavoritos = false;
+    private boolean showingFavorites = false;
 
     public FoodListFragment() {}
 
@@ -41,80 +39,108 @@ public class FoodListFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_food_list, container, false);
 
-        btn_favorites = view.findViewById(R.id.btn_favorites);
-
         rvFoodItems = view.findViewById(R.id.rv_food_items);
-        etSearchBar = view.findViewById(R.id.et_search_bar);
-        ivProfile = view.findViewById(R.id.iv_profile);
-        btnAdd = view.findViewById(R.id.btn_add);
-
-        btnAdd.setOnClickListener(v -> openAddFoodModal());
+        svSearchBar = view.findViewById(R.id.sv_search_bar);
+        tvFavoritesTitle = view.findViewById(R.id.tv_favorites_title);
+        Toolbar toolbar = view.findViewById(R.id.toolbar_food_list);
 
         alimentoViewModel = new ViewModelProvider(requireActivity()).get(AlimentoViewModel.class);
 
         setupRecycler();
         observeData();
-
-        btn_favorites.setOnClickListener(v -> {
-            mostrandoFavoritos = !mostrandoFavoritos;
-
-            if (mostrandoFavoritos) {
-
-                btn_favorites.setCompoundDrawablesWithIntrinsicBounds(
-                        R.drawable.ic_favorite_filled, 0, 0, 0
-                );
-
-                alimentoViewModel.getFavoritos(alimentoViewModel.getUsuarioId())
-                        .observe(getViewLifecycleOwner(), favoritos -> adapter.setLista(favoritos));
-
-            } else {
-
-                btn_favorites.setCompoundDrawablesWithIntrinsicBounds(
-                        R.drawable.ic_favorite, 0, 0, 0
-                );
-
-                alimentoViewModel.getAllAlimentos()
-                        .observe(getViewLifecycleOwner(), alimentos -> adapter.setLista(alimentos));
-            }
-        });
+        setupSearch();
+        setupToolbar(toolbar);
 
         return view;
     }
 
+    private void setupToolbar(Toolbar toolbar) {
+        toolbar.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.action_add) {
+                openAddFoodModal();
+                return true;
+            } else if (itemId == R.id.action_favorites) {
+                showingFavorites = !showingFavorites;
+                if (showingFavorites) {
+                    item.setIcon(R.drawable.ic_favorite_filled);
+                    tvFavoritesTitle.setVisibility(View.VISIBLE);
+                    alimentoViewModel.getFavorites(alimentoViewModel.getUserId()).observe(getViewLifecycleOwner(), adapter::setList);
+                } else {
+                    item.setIcon(R.drawable.ic_favorite);
+                    tvFavoritesTitle.setVisibility(View.GONE);
+                    observeData();
+                }
+                return true;
+            } else if (itemId == R.id.action_filter) {
+                openFilterModal();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void setupSearch() {
+        if (svSearchBar != null) {
+            svSearchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    performSearch(query);
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    performSearch(newText);
+                    return true;
+                }
+            });
+        }
+    }
+
+    private void performSearch(String query) {
+        if (adapter != null) {
+            adapter.getFilter().filter(query);
+        }
+    }
+
     private void setupRecycler() {
         rvFoodItems.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new AlimentoAdapter(
-                alimentoViewModel,
-                getViewLifecycleOwner()
-        );
-
+        adapter = new AlimentoAdapter(alimentoViewModel, getViewLifecycleOwner(), this);
         rvFoodItems.setAdapter(adapter);
     }
 
     private void observeData() {
-        alimentoViewModel.getAllAlimentos().observe(getViewLifecycleOwner(), alimentos -> {
-            adapter.setLista(alimentos);
-        });
+        alimentoViewModel.getAll().observe(getViewLifecycleOwner(), adapter::setList);
     }
 
     private void openAddFoodModal() {
-
         AddAlimentoDialog dialog = new AddAlimentoDialog(
                 requireContext(),
                 alimento -> {
-
                     AppDatabase.databaseWriteExecutor.execute(() -> {
-                        AppDatabase.getInstance(requireContext())
-                                .alimentoDAO()
-                                .inserir(alimento);
+                        AppDatabase.getInstance(requireContext()).alimentoDAO().insert(alimento);
                     });
-
-                    Toast.makeText(requireContext(),
-                            "Alimento adicionado: " + alimento.getNome(),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Food added: " + alimento.getNome(), Toast.LENGTH_SHORT).show();
                 }
         );
-
         dialog.show();
+    }
+
+    private void openFilterModal() {
+        FilterModalFragment filterModal = new FilterModalFragment();
+        filterModal.show(getParentFragmentManager(), filterModal.getTag());
+    }
+
+    public void confirmDelete(Alimento alimento) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Confirm Deletion")
+                .setMessage("Are you sure you want to delete'" + alimento.getNome() + "'?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    alimentoViewModel.delete(alimento);
+                    Toast.makeText(requireContext(), "Food deleted!", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 }

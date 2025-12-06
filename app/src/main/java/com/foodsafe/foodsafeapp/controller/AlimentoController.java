@@ -18,15 +18,17 @@ public class AlimentoController {
         dao = AppDatabase.getInstance(ctx).alimentoDAO();
     }
 
-    public void cadastrar(Alimento a) {
-        dao.inserir(a);
+    public void insert(Alimento a) {
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            dao.insert(a);
+        });
     }
 
-    public LiveData<List<Alimento>> listar() {
-        return dao.listarTodosAlimentos();
+    public LiveData<List<Alimento>> getAll() {
+        return dao.getAllAlimentos();
     }
 
-    public Alimento buscarPorId(int id) {
-        return dao.buscarAlimentoPorId(id);
+    public Alimento getById(int id) {
+        return dao.getAlimentoById(id);
     }
 }

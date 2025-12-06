@@ -3,21 +3,17 @@ package com.foodsafe.foodsafeapp.ui;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.content.Intent;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.foodsafe.foodsafeapp.R;
-import com.foodsafe.foodsafeapp.ui.ProfileActivity;
-import com.foodsafe.foodsafeapp.data.AppDatabase;
-import com.foodsafe.foodsafeapp.model.Usuario;
 
 public class HomeFragment extends Fragment {
 
@@ -25,63 +21,58 @@ public class HomeFragment extends Fragment {
     private RecyclerView rvFoodPreview;
     private RecyclerView rvRecipesPreview;
     private TextView tvUsername;
-    private AppDatabase db;
+    private HomeViewModel homeViewModel;
+    private FoodPreviewAdapter foodPreviewAdapter;
+    private RecipePreviewAdapter recipePreviewAdapter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         View view = inflater.inflate(R.layout.activity_home, container, false);
 
         tvUsername = view.findViewById(R.id.tv_username);
-
-        db = AppDatabase.getInstance(getContext());
-
-        observeLoggedInUser();
-
         ivProfile = view.findViewById(R.id.iv_profile);
         rvFoodPreview = view.findViewById(R.id.rv_home_food_preview);
         rvRecipesPreview = view.findViewById(R.id.rv_home_recipes_preview);
 
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+
         ivProfile.setOnClickListener(v -> {
-            if (getActivity() != null) {
-                Intent intent = new Intent(getActivity(), ProfileActivity.class);
-                startActivity(intent);
-            }
+            ProfileFragment profileFragment = new ProfileFragment();
+            profileFragment.show(getParentFragmentManager(), profileFragment.getTag());
         });
 
-        setupFoodPreview();
-        setupRecipesPreview();
+        setupRecyclerViews();
+        observeViewModel();
 
         return view;
     }
 
-    private void observeLoggedInUser() {
-        if (db == null) return;
+    private void setupRecyclerViews() {
+        rvFoodPreview.setLayoutManager(new LinearLayoutManager(getContext()));
+        foodPreviewAdapter = new FoodPreviewAdapter();
+        rvFoodPreview.setAdapter(foodPreviewAdapter);
 
-        db.usuarioDAO().getLoggedInUser().observe(getViewLifecycleOwner(), new Observer<Usuario>() {
-            @Override
-            public void onChanged(Usuario usuario) {
-                if (usuario != null) {
+        rvRecipesPreview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        recipePreviewAdapter = new RecipePreviewAdapter();
+        rvRecipesPreview.setAdapter(recipePreviewAdapter);
+    }
 
-                    tvUsername.setText(usuario.getNome());
-                } else {
-
-                    tvUsername.setText("Guest");
-                }
+    private void observeViewModel() {
+        homeViewModel.getLoggedInUser().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                tvUsername.setText(user.getNome());
+            } else {
+                tvUsername.setText("Guest");
             }
         });
-    }
 
-    private void setupFoodPreview() {
-        if (rvFoodPreview != null) {
-            rvFoodPreview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        }
-    }
+        homeViewModel.getFoodPreview().observe(getViewLifecycleOwner(), foods -> {
+            foodPreviewAdapter.setFoodList(foods);
+        });
 
-    private void setupRecipesPreview() {
-        if (rvRecipesPreview != null) {
-            rvRecipesPreview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        }
+        homeViewModel.getRecipePreview().observe(getViewLifecycleOwner(), recipes -> {
+            recipePreviewAdapter.setRecipeList(recipes);
+        });
     }
 }

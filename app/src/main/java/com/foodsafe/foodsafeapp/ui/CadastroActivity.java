@@ -10,7 +10,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.foodsafe.foodsafeapp.R;
-import com.foodsafe.foodsafeapp.controller.UsuarioController;
+import com.foodsafe.foodsafeapp.data.AppDatabase;
+import com.foodsafe.foodsafeapp.data.UsuarioDAO;
 import com.foodsafe.foodsafeapp.model.Usuario;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -19,7 +20,7 @@ public class CadastroActivity extends AppCompatActivity {
     private TextInputEditText etNome, etEmail, etSenha;
     private TextView etRestricoes;
     private Button btnCadastrar;
-    private UsuarioController controller;
+    private UsuarioDAO usuarioDAO;
     private TextView tvLoginLink;
 
     @Override
@@ -27,9 +28,9 @@ public class CadastroActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastrar);
 
-        controller = new UsuarioController(this);
+        usuarioDAO = AppDatabase.getInstance(this).usuarioDAO();
 
-        etNome = findViewById(R.id.et_nome); // ADDED: Find view for name
+        etNome = findViewById(R.id.et_nome); 
         etEmail = findViewById(R.id.et_email);
         etSenha = findViewById(R.id.et_senha);
         etRestricoes = findViewById(R.id.et_restricoes);
@@ -59,25 +60,21 @@ public class CadastroActivity extends AppCompatActivity {
             return;
         }
 
-        Usuario novoUsuario = new Usuario(nome, email, senha, restricoes);
-
-        controller.salvarUsuario(novoUsuario, new UsuarioController.CadastroCallback() {
-            @Override
-            public void onSuccess() {
-                runOnUiThread(() -> {
-                    Toast.makeText(CadastroActivity.this, "Registration successful!", Toast.LENGTH_LONG).show();
-                    Intent intent = new Intent(CadastroActivity.this, LoginActivity.class);
-                    startActivity(intent);
-                    finish();
-                });
+        new Thread(() -> {
+            if (usuarioDAO.getUserByEmail(email) != null) {
+                runOnUiThread(() -> Toast.makeText(CadastroActivity.this, "Email already registered.", Toast.LENGTH_SHORT).show());
+                return;
             }
 
-            @Override
-            public void onFailure() {
-                runOnUiThread(() -> {
-                    Toast.makeText(CadastroActivity.this, "Registration error. Please try again.", Toast.LENGTH_LONG).show();
-                });
-            }
-        });
+            Usuario novoUsuario = new Usuario(nome, email, senha, restricoes);
+            usuarioDAO.insertUsuario(novoUsuario);
+
+            runOnUiThread(() -> {
+                Toast.makeText(CadastroActivity.this, "Registration successful!", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(CadastroActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            });
+        }).start();
     }
 }

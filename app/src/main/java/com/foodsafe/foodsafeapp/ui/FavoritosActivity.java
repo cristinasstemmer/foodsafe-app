@@ -33,11 +33,11 @@ public class FavoritosActivity extends AppCompatActivity {
         int userId = getIntent().getIntExtra("userId", -1);
 
         if (userId != -1) {
-            List<Favorito> favs = controller.listarFavoritos(userId);
+            List<Favorito> favs = controller.getByUserId(userId);
             List<String> nomes = new ArrayList<>();
 
             for (Favorito f : favs) {
-                Alimento a = alimentoController.buscarPorId(f.getIdAlimento());
+                Alimento a = alimentoController.getById(f.getIdAlimento());
                 if (a != null) {
                     nomes.add(a.getNome() + " (Alergênicos: " + a.getContem_alergenos() + ")");
                 }
