@@ -54,7 +54,11 @@ public class UsuarioController {
     }
 
     public void editarPerfil(Usuario usuario) {
-        usuarioDAO.updateUsuario(usuario);
+        usuarioDAO.update(usuario);
+    }
+
+    public Usuario getUsuarioLogado(Usuario usuario) {
+        return usuarioDAO.getLoggedInUser();
     }
 
     public String obterRestricoesDoUsuario(int idUsuario) {

@@ -19,7 +19,7 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:scaleType="centerCrop"
-            android:src="@android:drawable/ic_menu_gallery"
+            android:src="@drawable/ic_food_placeholder"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -35,8 +35,7 @@
             android:textStyle="bold"
             android:textColor="@android:color/black"
             app:layout_constraintStart_toEndOf="@id/iv_recipe_image_large"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/iv_favorite_icon_large" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tv_recipe_details_large"

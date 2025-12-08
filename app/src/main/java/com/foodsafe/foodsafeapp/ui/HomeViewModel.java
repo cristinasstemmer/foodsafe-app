@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 public class HomeViewModel extends AndroidViewModel {
 
     private final AppDatabase db;
-    private final int userId;
     private final MutableLiveData<Usuario> loggedInUser = new MutableLiveData<>();
     private final MutableLiveData<List<Alimento>> foodPreview = new MutableLiveData<>();
     private final MutableLiveData<List<Receita>> recipePreview = new MutableLiveData<>();
@@ -30,9 +29,7 @@ public class HomeViewModel extends AndroidViewModel {
     public HomeViewModel(@NonNull Application application) {
         super(application);
         db = AppDatabase.getInstance(application);
-        SharedPreferences prefs = application.getSharedPreferences("FoodSafePrefs", Context.MODE_PRIVATE);
-        userId = prefs.getInt("USER_ID", -1);
-        loadData();
+        refreshData();
     }
 
     public LiveData<Usuario> getLoggedInUser() {
@@ -47,9 +44,11 @@ public class HomeViewModel extends AndroidViewModel {
         return recipePreview;
     }
 
-    private void loadData() {
+    public void refreshData() {
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            Usuario user = db.usuarioDAO().getLoggedInUser();
+            SharedPreferences prefs = getApplication().getSharedPreferences("FoodSafePrefs", Context.MODE_PRIVATE);
+            int userId = prefs.getInt("USER_ID", -1);
+            Usuario user = db.usuarioDAO().getById(userId);
             loggedInUser.postValue(user);
 
             if (user != null) {
@@ -71,7 +70,7 @@ public class HomeViewModel extends AndroidViewModel {
         });
     }
 
-    private List<Alimento> prioritizeAlimentos(List<Alimento> all, List<Integer> favorites, String restrictions) {
+    private List<Alimento> prioritizeAlimentos(List<Alimento> all, List<Integer> favorites, List<String> restrictions) {
         List<Alimento> result = new ArrayList<>();
         // 1. Add favorites
         for (Integer favId : favorites) {
@@ -81,7 +80,7 @@ public class HomeViewModel extends AndroidViewModel {
         // 2. Add compatible (if needed)
         if (result.size() < 3) {
             for (Alimento food : all) {
-                if (!favorites.contains(food.getId()) && isCompatible(food.getContem_alergenos(), restrictions)) {
+                if (!favorites.contains(food.getId()) && isAlimentoCompatible(food.getContem_alergenos(), restrictions)) {
                     result.add(food);
                     if (result.size() >= 3) break;
                 }
@@ -101,7 +100,7 @@ public class HomeViewModel extends AndroidViewModel {
         return result;
     }
     
-    private List<Receita> prioritizeReceitas(List<Receita> all, List<Integer> favorites, String restrictions) {
+    private List<Receita> prioritizeReceitas(List<Receita> all, List<Integer> favorites, List<String> restrictions) {
         List<Receita> result = new ArrayList<>();
         // 1. Add favorites
         for (Integer favId : favorites) {
@@ -111,7 +110,7 @@ public class HomeViewModel extends AndroidViewModel {
         // 2. Add compatible
         if (result.size() < 5) {
             for (Receita recipe : all) {
-                if (!favorites.contains(recipe.getId()) && isCompatible(recipe.getRestricoes(), restrictions)) {
+                if (!favorites.contains(recipe.getId()) && isReceitaCompatible(recipe.getRestricoes(), restrictions)) {
                     result.add(recipe);
                     if (result.size() >= 5) break;
                 }
@@ -131,14 +130,27 @@ public class HomeViewModel extends AndroidViewModel {
         return result;
     }
 
-    private boolean isCompatible(String itemAllergens, String userRestrictions) {
+    private boolean isReceitaCompatible(String itemAllergens, List<String> userRestrictions) {
         if (userRestrictions == null || userRestrictions.isEmpty()) return true;
         if (itemAllergens == null || itemAllergens.isEmpty()) return true;
 
-        String[] userResArr = userRestrictions.toLowerCase().split(",");
-        for (String restriction : userResArr) {
-            if (itemAllergens.toLowerCase().contains(restriction.trim())) {
+        for (String restriction : userRestrictions) {
+            if (itemAllergens.toLowerCase().contains(restriction.trim().toLowerCase())) {
                 return false; // Found a matching restriction
+            }
+        }
+        return true;
+    }
+
+    private boolean isAlimentoCompatible(List<String> itemAllergens, List<String> userRestrictions) {
+        if (userRestrictions == null || userRestrictions.isEmpty()) return true;
+        if (itemAllergens == null || itemAllergens.isEmpty()) return true;
+
+        for (String userRestriction : userRestrictions) {
+            for (String itemAllergen : itemAllergens) {
+                if (userRestriction.trim().equalsIgnoreCase(itemAllergen.trim())) {
+                    return false; // Found a matching restriction
+                }
             }
         }
         return true;

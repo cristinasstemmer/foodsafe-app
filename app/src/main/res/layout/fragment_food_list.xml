@@ -1,44 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <LinearLayout
+        android:id="@+id/ll_food_list_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_food_list"
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorOnSecondary"
-            app:title="Food List"
-            app:menu="@menu/food_list_menu" />
+            android:layout_height="wrap_content">
 
-    </com.google.android.material.appbar.AppBarLayout>
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar_food_list"
+                android:layout_width="match_parent"
+                android:paddingTop="20dp"
+                android:layout_height="80dp"
+                android:background="?attr/colorOnSecondary"
+                app:title="Food List"
+                app:menu="@menu/food_list_menu" />
 
-    <TextView
-        android:id="@+id/tv_favorites_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Favorites"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:visibility="gone" />
+        </com.google.android.material.appbar.AppBarLayout>
 
-    <SearchView
-        android:id="@+id/sv_search_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:queryHint="Search Food" />
+        <TextView
+            android:id="@+id/tv_favorites_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Favorites"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:visibility="gone" />
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/sv_search_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:queryHint="Search Food"
+            app:iconifiedByDefault="false" />
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_food_items"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_below="@id/ll_food_list_header" />
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/tv_no_results_food"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No results found."
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+</RelativeLayout>

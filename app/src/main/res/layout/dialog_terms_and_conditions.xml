@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:radius="12dp"
+    android:background="@drawable/rounded_card_background">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📜 FoodSafe Application Terms and Conditions of Use"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <ScrollView
+        android:id="@+id/sv_terms_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. Acceptance of Terms\nBy creating an account or using the FoodSafe application (the Application), you agree to comply with these Terms and Conditions of Use (Terms). If you do not agree with these Terms, do not use the Application.\n\n2. Purpose and Features\nThe FoodSafe Application is a tool designed to assist in managing food information, allowing users to:\n\nRegister and maintain a user profile.\n\n\nInput their dietary restrictions and allergens.\n\n\n
+Access a list of foods and recipes.\n\n\nFilter foods and recipes based on their restrictions.\n\n\nReceive recipe suggestions compatible with their preferences and restrictions.\n\n\nFavorite foods for quick access.\n\n\n3. Registration and User Data\n3.1. Registration Data\nTo use the main features, the user must complete a registration process by providing information such as name, email, and password .\n\n\nThe user is solely responsible for the accuracy of the data provided and the security of their password.\n\nThe Application will use the email and password for user authentication (login).\n\n\n3.2. Restrictions and Allergies\nThe user is solely responsible for correctly reporting all their dietary restrictions, allergens, and sensitivity levels in the \restrições\ (restrictions) field or equivalent.\n\n\nThis information is stored and used for the filtering and recipe suggestion functionalities.\n\n\n4. Disclaimer of Liability\nFoodSafe is a support and information tool, and not a substitute for professional medical or nutritional advice.\n\n\nAllergy Risk: The Application bases its suggestions on the information provided by the user and the registered data about the foods (the alergenos and ingredientes fields). We do not guarantee the accuracy, completeness, or timeliness of all food and recipe data.\n\n\nThe user assumes full responsibility for verifying the ingredients and labels of any food product before consumption, especially in cases of severe allergies.\n\nFoodSafe is not responsible for any allergic reactions, intolerances, or health problems resulting from the use of the information and suggestions provided.\n\n5. Intellectual Property\nAll content and code of the Application, including diagrams, screens, logos, and features, are the intellectual property of the FoodSafe creator. Use of the Application does not grant the user any rights over this intellectual property.\n\n\n
+6. General Provisions\nTermination: Your account may be terminated at any time, either by your own initiative or by FoodSafe, if these Terms are violated.\n\nChanges: These Terms may be modified at any time. Notification of changes will be provided through the Application.\n\nBy clicking \I Agree\ during the registration process, you declare that you have fully read and understood these Terms and Conditions." />
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btn_agree"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="I Agree"
+        android:enabled="false" />
+
+</LinearLayout>

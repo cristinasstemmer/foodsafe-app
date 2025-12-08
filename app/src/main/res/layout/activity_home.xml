@@ -9,36 +9,39 @@
     tools:context=".ui.HomeFragment">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        app:elevation="0dp">
+        app:elevation="10dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:paddingStart="16dp"
-            android:paddingEnd="16dp"
             android:paddingTop="12dp"
-            android:paddingBottom="12dp">
+            android:paddingEnd="16dp"
+            android:paddingBottom="22dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
                 android:text="Home"
-                android:textSize="20sp"
-                android:textStyle="bold"
                 android:textColor="@android:color/black"
-                android:layout_centerInParent="true"/>
+                android:textSize="20sp"
+                android:paddingTop="20dp"
+                android:textStyle="bold" />
 
             <ImageView
                 android:id="@+id/iv_profile"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@drawable/ic_user"
-                android:scaleType="centerCrop"
+                android:paddingTop="20dp"
                 android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_user" />
         </RelativeLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -83,7 +86,7 @@
                 android:id="@+id/rv_home_food_preview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="15dp"
                 tools:itemCount="2"
                 tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:orientation="vertical"

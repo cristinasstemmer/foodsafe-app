@@ -7,6 +7,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.model.Receita;
 import java.util.ArrayList;
@@ -27,7 +29,12 @@ public class RecipePreviewAdapter extends RecyclerView.Adapter<RecipePreviewAdap
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Receita recipe = recipeList.get(position);
         holder.tvRecipeName.setText(recipe.getNome());
-        holder.ivRecipeImage.setImageResource(R.drawable.ic_recipes); 
+
+        Glide.with(holder.itemView.getContext())
+                .load(recipe.getImagemUrl())
+                .placeholder(R.drawable.ic_food_placeholder)
+                .error(R.drawable.ic_food_placeholder)
+                .into(holder.ivRecipeImage);
 
         holder.itemView.setOnClickListener(v -> {
             RecipeDetailDialog.show(v.getContext(), recipe);
@@ -47,13 +54,11 @@ public class RecipePreviewAdapter extends RecyclerView.Adapter<RecipePreviewAdap
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivRecipeImage;
         TextView tvRecipeName;
-        ImageView ivFavorite;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivRecipeImage = itemView.findViewById(R.id.iv_recipe_image_small);
             tvRecipeName = itemView.findViewById(R.id.tv_recipe_title_small);
-            ivFavorite = itemView.findViewById(R.id.iv_favorite_icon_small);
         }
     }
 }

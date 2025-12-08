@@ -4,178 +4,164 @@ import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable; // Importação essencial
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.model.Alimento;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-// Implementando a interface Filterable
-public class AlimentoAdapter extends RecyclerView.Adapter<AlimentoAdapter.ViewHolder> implements Filterable {
+public class AlimentoAdapter extends RecyclerView.Adapter<AlimentoAdapter.ViewHolder> {
 
-    private final List<Alimento> listOriginal; // Contém todos os alimentos
-    private List<Alimento> list; // Contém os alimentos atualmente exibidos (filtrados)
-
+    private List<Alimento> listFull = new ArrayList<>();
+    private List<Alimento> listFiltered = new ArrayList<>();
     private final AlimentoViewModel viewModel;
     private final LifecycleOwner lifecycleOwner;
     private final FoodListFragment fragment;
+    private final TextView tvNoResults;
 
-    public AlimentoAdapter(AlimentoViewModel vm, LifecycleOwner owner, FoodListFragment fragment) {
+    public AlimentoAdapter(AlimentoViewModel vm, LifecycleOwner owner, FoodListFragment fragment, TextView tvNoResults) {
         this.viewModel = vm;
         this.lifecycleOwner = owner;
         this.fragment = fragment;
-        this.listOriginal = new ArrayList<>();
-        this.list = new ArrayList<>();
+        this.tvNoResults = tvNoResults;
     }
 
     @SuppressLint("NotifyDataSetChanged")
     public void setList(List<Alimento> newList) {
-        // Atualiza a lista original (fonte de verdade)
-        this.listOriginal.clear();
-        this.listOriginal.addAll(newList);
-
-        // Reseta a lista de exibição para mostrar tudo
-        this.list.clear();
-        this.list.addAll(newList);
-
+        this.listFull = new ArrayList<>(newList);
+        this.listFiltered = new ArrayList<>(newList);
         notifyDataSetChanged();
+        updateNoResultsView();
+    }
+
+    private void updateNoResultsView() {
+        if (tvNoResults != null) {
+            tvNoResults.setVisibility(listFiltered.isEmpty() ? View.VISIBLE : View.GONE);
+        }
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_alimento, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_alimento, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
-        Alimento alimento = list.get(position); // Usando a lista filtrada
+        Alimento alimento = listFiltered.get(position);
 
         holder.txtNome.setText(alimento.getNome());
         holder.txtDesc.setText(alimento.getDescricao());
 
-        viewModel.isFavorite(alimento.getId())
-                .observe(lifecycleOwner, favorito -> {
-                    if (favorito != null) {
-                        holder.btnFav.setImageResource(R.drawable.ic_favorite_filled);
-                        holder.btnFav.setTag("favorited");
-                    } else {
-                        holder.btnFav.setImageResource(R.drawable.ic_favorite);
-                        holder.btnFav.setTag("not");
-                    }
-                });
+        Glide.with(holder.itemView.getContext())
+                .load(alimento.getImagemUri())
+                .placeholder(R.drawable.ic_food_placeholder)
+                .error(R.drawable.ic_food_placeholder)
+                .into(holder.ivAlimentoImagem);
+
+        viewModel.isFavorite(alimento.getId()).observe(lifecycleOwner, favorito -> {
+            if (favorito != null) {
+                holder.btnFav.setImageResource(R.drawable.ic_favorite_filled);
+                holder.btnFav.setTag("favorited");
+            } else {
+                holder.btnFav.setImageResource(R.drawable.ic_favorite);
+                holder.btnFav.setTag("not");
+            }
+        });
 
         holder.btnFav.setOnClickListener(v -> {
-            String state = (String) holder.btnFav.getTag();
-
-            if ("favorited".equals(state)) {
+            if ("favorited".equals(holder.btnFav.getTag())) {
                 viewModel.unfavorite(alimento);
             } else {
                 viewModel.favorite(alimento);
             }
         });
 
-        holder.btnDelete.setOnClickListener(v -> {
-            fragment.confirmDelete(alimento);
-        });
-
-        holder.btnEdit.setOnClickListener(v -> {
-            openEditDialog(alimento);
-        });
+        holder.btnDelete.setOnClickListener(v -> fragment.confirmDelete(alimento));
+        holder.btnEdit.setOnClickListener(v -> fragment.openEditFoodModal(alimento));
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return listFiltered.size();
     }
 
-    // --- Implementação do Filterable ---
+    public void filter(String query, List<String> dietaryPrefs, boolean safeOnly, List<String> userRestrictions, List<String> excludeAllergens) {
+        List<Alimento> filteredList = new ArrayList<>();
 
-    @Override
-    public Filter getFilter() {
-        return alimentoFilter;
-    }
+        for (Alimento alimento : listFull) {
+            // Text search filter
+            boolean matchesQuery = query.isEmpty() || alimento.getNome().toLowerCase().contains(query.toLowerCase());
 
-    private final Filter alimentoFilter = new Filter() {
-
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            List<Alimento> filteredList = new ArrayList<>();
-            String charString = constraint.toString().toLowerCase().trim();
-
-            if (charString.isEmpty()) {
-                // Se a busca estiver vazia, retorna a lista completa
-                filteredList.addAll(listOriginal);
-            } else {
-                for (Alimento alimento : listOriginal) {
-                    // Lógica de busca: Verifica se o nome ou a descrição contém o texto
-                    if (alimento.getNome().toLowerCase().contains(charString) ||
-                            alimento.getDescricao().toLowerCase().contains(charString)) {
-
-                        filteredList.add(alimento);
+            // Dietary preferences filter
+            boolean matchesDiet = true;
+            if (dietaryPrefs != null && !dietaryPrefs.isEmpty()) {
+                List<String> alimentoAllergens = alimento.getContem_alergenos() != null ? 
+                        alimento.getContem_alergenos().stream().map(String::toLowerCase).collect(Collectors.toList()) : new ArrayList<>();
+                for (String pref : dietaryPrefs) {
+                    if (!alimentoAllergens.contains(pref.toLowerCase())) {
+                        matchesDiet = false;
+                        break;
                     }
                 }
             }
 
-            FilterResults results = new FilterResults();
-            results.values = filteredList;
-            return results;
-        }
-
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-            // Limpa a lista atual (lista filtrada) e adiciona os resultados
-            list.clear();
-            list.addAll((List<Alimento>) results.values);
-            // Notifica o RecyclerView para redesenhar a lista com os novos dados
-            notifyDataSetChanged();
-        }
-    };
-
-    // --- Funções Originais ---
-
-    private void openEditDialog(Alimento alimento) {
-
-        EditAlimentoDialog dialog = new EditAlimentoDialog(
-                fragment.requireContext(),
-                alimento,
-                editedAlimento -> {
-                    viewModel.update(editedAlimento);
-                    Toast.makeText(fragment.requireContext(),
-                            "Updated '" + editedAlimento.getNome() + "' food!",
-                            Toast.LENGTH_SHORT).show();
+            // "Safe only" filter (based on user's own restrictions)
+            boolean isSafe = true;
+            if (safeOnly && userRestrictions != null && !userRestrictions.isEmpty()) {
+                if (alimento.getContem_alergenos() != null) {
+                    for (String userRestriction : userRestrictions) {
+                        if (alimento.getContem_alergenos().stream().anyMatch(a -> a.equalsIgnoreCase(userRestriction))) {
+                            isSafe = false;
+                            break;
+                        }
+                    }
                 }
-        );
+            }
 
-        dialog.show();
+            // Temporary "Exclude allergens" filter
+            boolean isExcluded = false;
+            if (excludeAllergens != null && !excludeAllergens.isEmpty()) {
+                if (alimento.getContem_alergenos() != null) {
+                    for (String exclusion : excludeAllergens) {
+                        if (alimento.getContem_alergenos().stream().anyMatch(a -> a.equalsIgnoreCase(exclusion))) {
+                            isExcluded = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (matchesQuery && matchesDiet && isSafe && !isExcluded) {
+                filteredList.add(alimento);
+            }
+        }
+
+        listFiltered = filteredList;
+        notifyDataSetChanged();
+        updateNoResultsView();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-
         TextView txtNome, txtDesc;
-        ImageView btnFav;
-        ImageView btnDelete;
-        ImageView btnEdit;
+        ImageView btnFav, btnDelete, btnEdit, ivAlimentoImagem;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             txtNome = itemView.findViewById(R.id.tv_alimento_nome);
             txtDesc = itemView.findViewById(R.id.tv_alimento_alergenos);
             btnFav = itemView.findViewById(R.id.iv_favoritar);
-
+            ivAlimentoImagem = itemView.findViewById(R.id.iv_alimento_imagem);
             btnEdit = itemView.findViewById(R.id.iv_editar);
             btnDelete = itemView.findViewById(R.id.iv_deletar);
         }

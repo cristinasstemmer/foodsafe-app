@@ -17,6 +17,9 @@ public interface UsuarioDAO {
     @Query("SELECT * FROM usuario WHERE email = :email LIMIT 1")
     Usuario getUserByEmail(String email);
 
+    @Query("SELECT * FROM usuario WHERE id = :userId")
+    LiveData<Usuario> getUserById(int userId);
+
     @Query("SELECT * FROM usuario WHERE email = :email AND senha = :senha LIMIT 1")
     Usuario login(String email, String senha);
 
@@ -26,6 +29,9 @@ public interface UsuarioDAO {
     @Query("SELECT * FROM usuario LIMIT 1")
     Usuario getLoggedInUser();
 
+    @Query("SELECT * FROM usuario WHERE id = :id")
+    Usuario getById(int id);
+
     @Update
-    void updateUsuario(Usuario usuario);
+    void update(Usuario usuario);
 }

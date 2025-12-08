@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.FoodSafe" parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- Base application theme. -->
+    <style name="Theme.FoodSafe" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
         <item name="colorOnPrimary">@color/colorOnPrimary</item>
@@ -21,26 +22,31 @@
         <item name="android:statusBarColor">@color/colorPrimaryDark</item>
     </style>
 
-        <style name="ChipStyle" parent="Widget.Material3.Button.OutlinedButton">
-            <item name="android:minHeight">32dp</item>
-            <item name="android:textSize">14sp</item>
-            <item name="strokeColor">@color/colorPrimary</item>
-            <item name="android:textColor">@color/colorPrimary</item>
-            <item name="cornerRadius">16dp</item>
-        </style>
+    <style name="Theme.FoodSafe.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.FoodSafe.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-        <style name="ChipStyle.Selected" parent="ChipStyle">
-            <item name="android:backgroundTint">@color/colorPrimary</item>
-            <item name="android:textColor">@color/white</item>
-            <item name="strokeWidth">0dp</item>
-        </style>
+    <style name="ChipStyle" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">32dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="strokeColor">@color/colorPrimary</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="cornerRadius">16dp</item>
+    </style>
+
+    <style name="ChipStyle.Selected" parent="ChipStyle">
+        <item name="android:backgroundTint">@color/colorPrimary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
 
     <style name="BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@drawable/bottom_sheet_background</item>
     </style>
 
-    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+    <style name="BottomSheetDialogTheme" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
     </style>
 
 

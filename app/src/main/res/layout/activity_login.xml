@@ -71,7 +71,7 @@
             android:id="@+id/tv_forgot_password"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Forgot?"
+            android:text="Forgot password?"
             android:textColor="@color/colorPrimary"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"/>
@@ -88,7 +88,7 @@
         android:textSize="18sp"
         android:textStyle="bold"
         app:cornerRadius="12dp"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -98,7 +98,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Don't have an account?"
+            android:text="Don\'t have an account?"
             android:textColor="@android:color/black"/>
 
         <TextView

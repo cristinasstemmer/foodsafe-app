@@ -3,28 +3,29 @@ package com.foodsafe.foodsafeapp.ui;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.model.Receita;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder> implements Filterable {
+public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder> {
 
-    private List<Receita> recipes = new ArrayList<>();
     private List<Receita> recipesFull = new ArrayList<>();
+    private List<Receita> recipesFiltered = new ArrayList<>();
     private final RecipeViewModel viewModel;
     private final LifecycleOwner lifecycleOwner;
+    private final TextView tvNoResults;
 
-    public RecipeAdapter(RecipeViewModel viewModel, LifecycleOwner lifecycleOwner) {
+    public RecipeAdapter(RecipeViewModel viewModel, LifecycleOwner lifecycleOwner, TextView tvNoResults) {
         this.viewModel = viewModel;
         this.lifecycleOwner = lifecycleOwner;
+        this.tvNoResults = tvNoResults;
     }
 
     @NonNull
@@ -36,10 +37,15 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Receita recipe = recipes.get(position);
+        Receita recipe = recipesFiltered.get(position);
         holder.tvRecipeName.setText(recipe.getNome());
         holder.tvRecipeDescription.setText(recipe.getDescricao());
-        holder.ivRecipeImage.setImageResource(R.drawable.ic_recipes);
+
+        Glide.with(holder.itemView.getContext())
+                .load(recipe.getImagemUrl())
+                .placeholder(R.drawable.ic_food_placeholder)
+                .error(R.drawable.ic_food_placeholder)
+                .into(holder.ivRecipeImage);
 
         viewModel.isFavorite(recipe.getId()).observe(lifecycleOwner, favoritoReceita -> {
             if (favoritoReceita != null) {
@@ -66,46 +72,73 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
-        return recipes.size();
+        return recipesFiltered.size();
     }
 
     public void setRecipes(List<Receita> recipes) {
-        this.recipes = recipes;
         this.recipesFull = new ArrayList<>(recipes);
+        this.recipesFiltered = new ArrayList<>(recipes);
         notifyDataSetChanged();
+        updateNoResultsView();
     }
 
-    @Override
-    public Filter getFilter() {
-        return recipeFilter;
+    private void updateNoResultsView() {
+        if (tvNoResults != null) {
+            tvNoResults.setVisibility(recipesFiltered.isEmpty() ? View.VISIBLE : View.GONE);
+        }
     }
 
-    private final Filter recipeFilter = new Filter() {
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            List<Receita> filteredList = new ArrayList<>();
-            if (constraint == null || constraint.length() == 0) {
-                filteredList.addAll(recipesFull);
-            } else {
-                String filterPattern = constraint.toString().toLowerCase().trim();
-                for (Receita item : recipesFull) {
-                    if (item.getNome().toLowerCase().contains(filterPattern)) {
-                        filteredList.add(item);
+    public void filter(String query, List<String> dietaryPrefs, boolean safeOnly, List<String> userRestrictions, List<String> excludeAllergens) {
+        List<Receita> filteredList = new ArrayList<>();
+
+        for (Receita recipe : recipesFull) {
+            String recipeRestrictions = recipe.getRestricoes() != null ? recipe.getRestricoes().toLowerCase() : "";
+
+            // Text search filter
+            boolean matchesQuery = query.isEmpty() || recipe.getNome().toLowerCase().contains(query.toLowerCase());
+
+            // Dietary preferences filter
+            boolean matchesDiet = true;
+            if (dietaryPrefs != null && !dietaryPrefs.isEmpty()) {
+                for (String pref : dietaryPrefs) {
+                    if (!recipeRestrictions.contains(pref.toLowerCase())) {
+                        matchesDiet = false;
+                        break;
                     }
                 }
             }
-            FilterResults results = new FilterResults();
-            results.values = filteredList;
-            return results;
+
+            // "Safe only" filter
+            boolean isSafe = true;
+            if (safeOnly && userRestrictions != null && !userRestrictions.isEmpty()) {
+                for (String userRestriction : userRestrictions) {
+                    if (recipeRestrictions.contains(userRestriction.toLowerCase())) {
+                        isSafe = false;
+                        break;
+                    }
+                }
+            }
+            
+            // Temporary "Exclude allergens" filter
+            boolean isExcluded = false;
+            if (excludeAllergens != null && !excludeAllergens.isEmpty()) {
+                for (String exclusion : excludeAllergens) {
+                    if (recipeRestrictions.contains(exclusion.toLowerCase())) {
+                        isExcluded = true;
+                        break;
+                    }
+                }
+            }
+
+            if (matchesQuery && matchesDiet && isSafe && !isExcluded) {
+                filteredList.add(recipe);
+            }
         }
 
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults results) {
-            recipes.clear();
-            recipes.addAll((List) results.values);
-            notifyDataSetChanged();
-        }
-    };
+        recipesFiltered = filteredList;
+        notifyDataSetChanged();
+        updateNoResultsView();
+    }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivRecipeImage;

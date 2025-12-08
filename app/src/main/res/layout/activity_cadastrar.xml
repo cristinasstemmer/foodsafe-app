@@ -76,6 +76,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_restricoes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
@@ -90,12 +91,33 @@
                 android:inputType="none"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <CheckBox
-            android:id="@+id/cb_terms"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="I agree with Terms and Conditions"
-            android:layout_marginBottom="32dp"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="32dp">
+
+            <CheckBox
+                android:id="@+id/cb_terms"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="I agree with " />
+
+            <TextView
+                android:id="@+id/tv_terms_link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Terms and Conditions"
+                android:textColor="@color/colorPrimary"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/btn_cadastrar"
@@ -107,7 +129,8 @@
             android:backgroundTint="@color/colorPrimary"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
+            app:cornerRadius="12dp"
+            android:layout_marginBottom="16dp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -126,8 +149,7 @@
                 android:layout_height="wrap_content"
                 android:text=" Log In"
                 android:textColor="@color/colorPrimary"
-                android:textStyle="bold"
-                android:onClick="onLoginClick"/>
+                android:textStyle="bold" />
         </LinearLayout>
 
     </LinearLayout>

@@ -3,6 +3,7 @@ package com.foodsafe.foodsafeapp.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -21,7 +22,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etSenha;
     private Button btnLogin;
-    private TextView tvSignUpLink;
+    private TextView tvSignUpLink, tvForgotPassword;
     private UsuarioDAO usuarioDAO;
 
     @Override
@@ -33,8 +34,8 @@ public class LoginActivity extends AppCompatActivity {
         etSenha = findViewById(R.id.et_senha);
         btnLogin = findViewById(R.id.btn_login);
         tvSignUpLink = findViewById(R.id.tv_sign_up_link);
+        tvForgotPassword = findViewById(R.id.tv_forgot_password);
         usuarioDAO = AppDatabase.getInstance(this).usuarioDAO();
-
 
         btnLogin.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();
@@ -49,11 +50,10 @@ public class LoginActivity extends AppCompatActivity {
                 Usuario usuario = usuarioDAO.login(email, senha);
                 runOnUiThread(() -> {
                     if (usuario != null) {
-                        // Save user ID to SharedPreferences synchronously
                         SharedPreferences prefs = getSharedPreferences("FoodSafePrefs", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putInt("USER_ID", usuario.getId());
-                        editor.commit(); // Use commit() for synchronous save
+                        editor.commit();
 
                         Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -69,5 +69,13 @@ public class LoginActivity extends AppCompatActivity {
         tvSignUpLink.setOnClickListener(v ->
                 startActivity(new Intent(this, CadastroActivity.class))
         );
+
+        tvForgotPassword.setOnClickListener(v -> openUrl());
+    }
+
+    private void openUrl() {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse("https://forms.gle/mU3M2gum37EwPkHz7"));
+        startActivity(intent);
     }
 }

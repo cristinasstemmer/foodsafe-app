@@ -48,6 +48,12 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        homeViewModel.refreshData();
+    }
+
     private void setupRecyclerViews() {
         rvFoodPreview.setLayoutManager(new LinearLayoutManager(getContext()));
         foodPreviewAdapter = new FoodPreviewAdapter();

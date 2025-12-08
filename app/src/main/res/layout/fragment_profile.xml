@@ -4,9 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" 
+    android:layout_height="wrap_content"
     android:paddingBottom="24dp"
-    android:background="@drawable/bottom_sheet_background" 
+    android:background="@drawable/bottom_sheet_background"
     tools:context=".ui.ProfileFragment">
 
     <ImageView
@@ -32,18 +32,33 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/iv_profile_picture"
+    <FrameLayout
+        android:id="@+id/fl_profile_picture"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="32dp"
-        android:src="@drawable/ic_user"
-        app:civ_border_color="@android:color/darker_gray"
-        app:civ_border_width="1dp"
         app:layout_constraintTop_toBottomOf="@id/tv_profile_title"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="MissingClass" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/iv_profile_picture"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_user"
+            app:civ_border_color="@android:color/darker_gray"
+            app:civ_border_width="1dp" />
+
+        <ImageView
+            android:id="@+id/iv_add_photo"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_photo_add"
+            android:background="@drawable/circle_background"
+            android:padding="4dp"
+            android:layout_gravity="bottom|end" />
+
+    </FrameLayout>
 
     <TextView
         android:id="@+id/tv_name"
@@ -54,7 +69,7 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/colorPrimary"
-        app:layout_constraintTop_toBottomOf="@id/iv_profile_picture"
+        app:layout_constraintTop_toBottomOf="@id/fl_profile_picture"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -89,7 +104,7 @@
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableEnd="@drawable/ic_arrow_forward"
+                android:drawableEnd="@drawable/ic_edit"
                 android:text="Dietary Restrictions" />
 
             <TextView

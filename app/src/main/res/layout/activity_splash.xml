@@ -43,14 +43,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="74dp"
         android:padding="16dp"
         android:text="Get Started"
         android:textColor="#87C558"
         android:textSize="18sp"
         android:textStyle="bold"
 
-        app:cornerRadius="12dp"
         app:backgroundTint="@android:color/white"
-        />
+        app:cornerRadius="12dp" />
 </RelativeLayout>

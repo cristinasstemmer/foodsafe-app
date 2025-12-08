@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.model.Alimento;
 import java.util.ArrayList;
@@ -27,7 +28,12 @@ public class FoodPreviewAdapter extends RecyclerView.Adapter<FoodPreviewAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Alimento food = foodList.get(position);
         holder.tvFoodName.setText(food.getNome());
-        holder.ivFoodImage.setImageResource(R.drawable.ic_food_list); 
+
+        Glide.with(holder.itemView.getContext())
+                .load(food.getImagemUri())
+                .placeholder(R.drawable.ic_food_placeholder)
+                .error(R.drawable.ic_food_placeholder)
+                .into(holder.ivFoodImage);
 
         holder.itemView.setOnClickListener(v -> {
             FoodDetailDialog.show(v.getContext(), food);

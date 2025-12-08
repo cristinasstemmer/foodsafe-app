@@ -2,6 +2,8 @@ package com.foodsafe.foodsafeapp.ui;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -28,6 +30,12 @@ public class FoodDetailDialog {
         builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
+        dialog.show();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
         dialog.show();
     }
 }

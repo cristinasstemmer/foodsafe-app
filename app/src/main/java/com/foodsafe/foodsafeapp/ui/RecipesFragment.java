@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SearchView;
+import androidx.appcompat.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,19 +12,31 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.foodsafe.foodsafeapp.R;
 
-public class RecipesFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public class RecipesFragment extends Fragment implements FilterListener {
 
     private RecyclerView rvRecipesList;
     private RecipeViewModel recipeViewModel;
+    private UsuarioViewModel usuarioViewModel;
     private RecipeAdapter recipeAdapter;
     private SearchView svSearch;
     private TextView tvFavoritesTitle;
+    private TextView tvNoResults;
     private boolean showingFavorites = false;
+
+    private String currentQuery = "";
+    private List<String> currentDietaryPrefs = new ArrayList<>();
+    private boolean currentSafeOnly = false;
+    private List<String> currentExcludeAllergens = new ArrayList<>();
+    private List<String> currentUserRestrictions = new ArrayList<>();
 
     @Nullable
     @Override
@@ -34,14 +46,17 @@ public class RecipesFragment extends Fragment {
         rvRecipesList = view.findViewById(R.id.rv_recipes_list);
         svSearch = view.findViewById(R.id.sv_search_recipes);
         tvFavoritesTitle = view.findViewById(R.id.tv_favorites_title_recipes);
+        tvNoResults = view.findViewById(R.id.tv_no_results_recipes);
         Toolbar toolbar = view.findViewById(R.id.toolbar_recipes);
 
         recipeViewModel = new ViewModelProvider(this).get(RecipeViewModel.class);
+        usuarioViewModel = new ViewModelProvider(requireActivity()).get(UsuarioViewModel.class);
 
         setupRecipesRecyclerView();
         setupToolbar(toolbar);
         setupSearch();
 
+        observeUser();
         observeRecipes();
 
         return view;
@@ -55,7 +70,9 @@ public class RecipesFragment extends Fragment {
                 if (showingFavorites) {
                     item.setIcon(R.drawable.ic_favorite_filled);
                     tvFavoritesTitle.setVisibility(View.VISIBLE);
-                    recipeViewModel.getFavoriteRecipes().observe(getViewLifecycleOwner(), recipeAdapter::setRecipes);
+                    recipeViewModel.getFavoriteRecipes().observe(getViewLifecycleOwner(), recipes -> {
+                        recipeAdapter.setRecipes(recipes);
+                    });
                 } else {
                     item.setIcon(R.drawable.ic_favorite);
                     tvFavoritesTitle.setVisibility(View.GONE);
@@ -63,7 +80,8 @@ public class RecipesFragment extends Fragment {
                 }
                 return true;
             } else if (itemId == R.id.action_filter) {
-                // Implement filter logic here
+                FilterModalFragment filterModal = new FilterModalFragment();
+                filterModal.show(getParentFragmentManager(), "FilterModal");
                 return true;
             }
             return false;
@@ -72,8 +90,9 @@ public class RecipesFragment extends Fragment {
 
     private void setupRecipesRecyclerView() {
         if (rvRecipesList != null) {
-            rvRecipesList.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-            recipeAdapter = new RecipeAdapter(recipeViewModel, getViewLifecycleOwner());
+            int columnCount = getResources().getInteger(R.integer.grid_column_count);
+            rvRecipesList.setLayoutManager(new GridLayoutManager(getContext(), columnCount));
+            recipeAdapter = new RecipeAdapter(recipeViewModel, getViewLifecycleOwner(), tvNoResults);
             rvRecipesList.setAdapter(recipeAdapter);
         }
     }
@@ -87,13 +106,51 @@ public class RecipesFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                recipeAdapter.getFilter().filter(newText);
-                return false;
+                currentQuery = newText;
+                applyAllFilters();
+                return true;
             }
         });
     }
 
     private void observeRecipes() {
-        recipeViewModel.getAllRecipes().observe(getViewLifecycleOwner(), recipeAdapter::setRecipes);
+        recipeViewModel.getAllRecipes().observe(getViewLifecycleOwner(), recipes -> {
+            recipeAdapter.setRecipes(recipes);
+            applyAllFilters();
+        });
+    }
+
+    private void observeUser() {
+        usuarioViewModel.getLoggedUser().observe(getViewLifecycleOwner(), usuario -> {
+            if (usuario != null && usuario.getRestricoes() != null) {
+                currentUserRestrictions = usuario.getRestricoes();
+                applyAllFilters(); // Re-apply filters if user restrictions change
+            }
+        });
+    }
+
+    private void applyAllFilters() {
+        if (recipeAdapter != null) {
+            recipeAdapter.filter(currentQuery, currentDietaryPrefs, currentSafeOnly, currentUserRestrictions, currentExcludeAllergens);
+        }
+    }
+
+    @Override
+    public void onFiltersApplied(Map<String, Object> filters) {
+        currentSafeOnly = (boolean) filters.getOrDefault("safe_only", false);
+        currentDietaryPrefs = (List<String>) filters.getOrDefault("dietary_preferences", new ArrayList<>());
+        currentExcludeAllergens = (List<String>) filters.getOrDefault("exclude_allergens", new ArrayList<>());
+        applyAllFilters();
+    }
+
+    @Override
+    public void onFiltersCleared() {
+        currentSafeOnly = false;
+        currentDietaryPrefs.clear();
+        currentExcludeAllergens.clear();
+        if (svSearch != null) {
+            svSearch.setQuery("", false);
+        }
+        applyAllFilters();
     }
 }

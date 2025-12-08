@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.foodsafe.foodsafeapp.model.Alimento;
@@ -17,7 +18,8 @@ import com.foodsafe.foodsafeapp.model.Usuario;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {Usuario.class, Alimento.class, Receita.class, Favorito.class, FavoritoReceita.class}, version = 11, exportSchema = false)
+@Database(entities = {Usuario.class, Alimento.class, Receita.class, Favorito.class, FavoritoReceita.class}, version = 21, exportSchema = false)
+@TypeConverters({StringListConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDAO usuarioDAO();
@@ -36,7 +38,7 @@ public abstract class AppDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context, AppDatabase.class, "foodsafe.db")
+                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "foodsafe.db")
                             .fallbackToDestructiveMigration()
                             .addCallback(sRoomDatabaseCallback)
                             .build();
@@ -46,17 +48,15 @@ public abstract class AppDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    private static RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
+    private static final RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
         @Override
         public void onCreate(@NonNull SupportSQLiteDatabase db) {
             super.onCreate(db);
 
             databaseWriteExecutor.execute(() -> {
-                // Populate Alimentos
                 AlimentoDAO alimentoDAO = INSTANCE.alimentoDAO();
                 alimentoDAO.insertAll(Prepopulation.getAlimentos());
 
-                // Populate Receitas one by one for debugging
                 ReceitaDAO receitaDAO = INSTANCE.receitaDAO();
                 for (Receita receita : Prepopulation.getReceitas()) {
                     try {
