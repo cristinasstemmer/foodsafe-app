@@ -1,6 +1,8 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.adapters;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.model.Alimento;
+import com.foodsafe.foodsafeapp.ui.views.AlimentoViewModel;
+import com.foodsafe.foodsafeapp.ui.dialogs.FoodDetailDialog;
+import com.foodsafe.foodsafeapp.ui.fragments.FoodListFragment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AlimentoAdapter extends RecyclerView.Adapter<AlimentoAdapter.ViewHolder> {
 
@@ -61,10 +65,19 @@ public class AlimentoAdapter extends RecyclerView.Adapter<AlimentoAdapter.ViewHo
         Alimento alimento = listFiltered.get(position);
 
         holder.txtNome.setText(alimento.getNome());
-        holder.txtDesc.setText(alimento.getDescricao());
+        List<String> alergenos = alimento.getContem_alergenos();
+        if (alergenos != null && !alergenos.isEmpty()) {
+            holder.txtDesc.setText("Alergênos: " + TextUtils.join(", ", alergenos));
+        } else {
+            holder.txtDesc.setText("Sem alergênos");
+        }
 
-        Glide.with(holder.itemView.getContext())
-                .load(alimento.getImagemUri())
+        Context context = holder.itemView.getContext();
+        String imageName = alimento.getImagemUri();
+        int resourceId = context.getResources().getIdentifier(imageName, "drawable", context.getPackageName());
+
+        Glide.with(context)
+                .load(resourceId)
                 .placeholder(R.drawable.ic_food_placeholder)
                 .error(R.drawable.ic_food_placeholder)
                 .into(holder.ivAlimentoImagem);
@@ -77,6 +90,10 @@ public class AlimentoAdapter extends RecyclerView.Adapter<AlimentoAdapter.ViewHo
                 holder.btnFav.setImageResource(R.drawable.ic_favorite);
                 holder.btnFav.setTag("not");
             }
+        });
+
+        holder.itemView.setOnClickListener(v -> {
+            FoodDetailDialog.show(v.getContext(), alimento);
         });
 
         holder.btnFav.setOnClickListener(v -> {
@@ -96,25 +113,12 @@ public class AlimentoAdapter extends RecyclerView.Adapter<AlimentoAdapter.ViewHo
         return listFiltered.size();
     }
 
-    public void filter(String query, List<String> dietaryPrefs, boolean safeOnly, List<String> userRestrictions, List<String> excludeAllergens) {
+    public void filter(String query, boolean safeOnly, List<String> userRestrictions, List<String> excludeAllergens) {
         List<Alimento> filteredList = new ArrayList<>();
 
         for (Alimento alimento : listFull) {
             // Text search filter
             boolean matchesQuery = query.isEmpty() || alimento.getNome().toLowerCase().contains(query.toLowerCase());
-
-            // Dietary preferences filter
-            boolean matchesDiet = true;
-            if (dietaryPrefs != null && !dietaryPrefs.isEmpty()) {
-                List<String> alimentoAllergens = alimento.getContem_alergenos() != null ? 
-                        alimento.getContem_alergenos().stream().map(String::toLowerCase).collect(Collectors.toList()) : new ArrayList<>();
-                for (String pref : dietaryPrefs) {
-                    if (!alimentoAllergens.contains(pref.toLowerCase())) {
-                        matchesDiet = false;
-                        break;
-                    }
-                }
-            }
 
             // "Safe only" filter (based on user's own restrictions)
             boolean isSafe = true;
@@ -142,7 +146,7 @@ public class AlimentoAdapter extends RecyclerView.Adapter<AlimentoAdapter.ViewHo
                 }
             }
 
-            if (matchesQuery && matchesDiet && isSafe && !isExcluded) {
+            if (matchesQuery && isSafe && !isExcluded) {
                 filteredList.add(alimento);
             }
         }

@@ -1,4 +1,4 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.views;
 
 import android.app.Application;
 import android.content.Context;
@@ -52,7 +52,6 @@ public class HomeViewModel extends AndroidViewModel {
             loggedInUser.postValue(user);
 
             if (user != null) {
-                // Load Food Preview
                 List<Alimento> allFoods = db.alimentoDAO().getAllAlimentosSync();
                 List<Integer> favoriteFoodIds = db.favoritoDAO().getByUserId(userId).stream()
                         .map(fav -> fav.getIdAlimento()).collect(Collectors.toList());
@@ -60,7 +59,6 @@ public class HomeViewModel extends AndroidViewModel {
                 List<Alimento> prioritizedFoods = prioritizeAlimentos(allFoods, favoriteFoodIds, user.getRestricoes());
                 foodPreview.postValue(prioritizedFoods.stream().limit(3).collect(Collectors.toList()));
 
-                // Load Recipe Preview
                 List<Receita> allRecipes = db.receitaDAO().getAll();
                 List<Integer> favoriteRecipeIds = db.favoritoReceitaDAO().getFavoriteRecipeIdsByUserId(userId);
                 
@@ -136,7 +134,7 @@ public class HomeViewModel extends AndroidViewModel {
 
         for (String restriction : userRestrictions) {
             if (itemAllergens.toLowerCase().contains(restriction.trim().toLowerCase())) {
-                return false; // Found a matching restriction
+                return false;
             }
         }
         return true;
@@ -149,7 +147,7 @@ public class HomeViewModel extends AndroidViewModel {
         for (String userRestriction : userRestrictions) {
             for (String itemAllergen : itemAllergens) {
                 if (userRestriction.trim().equalsIgnoreCase(itemAllergen.trim())) {
-                    return false; // Found a matching restriction
+                    return false;
                 }
             }
         }

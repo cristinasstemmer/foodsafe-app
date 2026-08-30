@@ -17,7 +17,7 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".ui.SplashActivity"
+            android:name=".ui.activities.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.FoodSafe.NoActionBar.Splash">
             <intent-filter>
@@ -27,12 +27,12 @@
         </activity>
 
         <activity
-            android:name=".ui.LoginActivity"
+            android:name=".ui.activities.LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.FoodSafe" />
 
         <activity
-            android:name=".ui.CadastroActivity"
+            android:name=".ui.activities.CadastroActivity"
             android:exported="false"
             android:theme="@style/Theme.FoodSafe" />
 

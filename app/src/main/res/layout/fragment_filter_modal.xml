@@ -10,8 +10,8 @@
     android:background="@drawable/bottom_sheet_background">
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="63dp"
+        android:layout_width="373dp"
+        android:layout_height="68dp"
         android:paddingBottom="16dp">
 
         <ImageView
@@ -41,7 +41,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Only show safe foods for me"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp"
+        app:thumbTint="@color/switch_thumb_selector"
+        app:trackTint="@color/switch_track_selector" />
 
     <View
         android:layout_width="match_parent"
@@ -52,51 +54,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Dietary preferences"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="8dp" />
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chip_group_dietary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp">
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_vegan"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Vegan" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_vegetarian"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Vegetarian" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_gluten_free"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Gluten-Free" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_lactose_free"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lactose-Free" />
-
-    </com.google.android.material.chip.ChipGroup>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Exclude allergens"
+        android:text="Select other restrictions to filter"
         android:textSize="16sp"
         android:textStyle="bold"
         android:layout_marginBottom="8dp" />
@@ -112,7 +70,7 @@
             android:id="@+id/et_exclude_allergens"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Select allergens to exclude"
+            android:hint="Select items to exclude"
             android:inputType="none" />
     </com.google.android.material.textfield.TextInputLayout>
 

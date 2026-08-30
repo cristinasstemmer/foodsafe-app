@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:paddingBottom="24dp"
     android:background="@drawable/bottom_sheet_background"
-    tools:context=".ui.ProfileFragment">
+    tools:context=".ui.fragments.ProfileFragment">
 
     <ImageView
         android:id="@+id/iv_back"

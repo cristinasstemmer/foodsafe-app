@@ -5,6 +5,7 @@ import android.content.Context;
 import com.foodsafe.foodsafeapp.data.AppDatabase;
 import com.foodsafe.foodsafeapp.data.UsuarioDAO;
 import com.foodsafe.foodsafeapp.model.Usuario;
+import com.foodsafe.foodsafeapp.util.PasswordManager;
 
 public class UsuarioController {
     private final UsuarioDAO usuarioDAO;
@@ -32,6 +33,8 @@ public class UsuarioController {
 
         AppDatabase.databaseWriteExecutor.execute(() -> {
             try {
+                String hashedPassword = PasswordManager.hashPassword(usuario.getSenha());
+                usuario.setSenha(hashedPassword);
                 usuarioDAO.insertUsuario(usuario);
                 callback.onSuccess();
             } catch (Exception e) {
@@ -43,9 +46,9 @@ public class UsuarioController {
 
     public void realizarLogin(String email, String senha, LoginCallback callback) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            Usuario usuario = usuarioDAO.login(email, senha);
+            Usuario usuario = usuarioDAO.getUserByEmail(email);
 
-            if (usuario != null) {
+            if (usuario != null && PasswordManager.checkPassword(senha, usuario.getSenha())) {
                 callback.onSuccess(usuario);
             } else {
                 callback.onFailure();

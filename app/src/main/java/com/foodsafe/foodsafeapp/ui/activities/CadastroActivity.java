@@ -1,4 +1,4 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,6 +21,7 @@ import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.data.AppDatabase;
 import com.foodsafe.foodsafeapp.data.UsuarioDAO;
 import com.foodsafe.foodsafeapp.model.Usuario;
+import com.foodsafe.foodsafeapp.util.PasswordManager;
 import com.foodsafe.foodsafeapp.util.Restrictions;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -118,7 +119,7 @@ public class CadastroActivity extends AppCompatActivity {
                 .setMultiChoiceItems(items, checkedItems, (dialog, which, isChecked) -> {
                     String selected = items[which];
                     if (selected.equals("Other")) {
-                        ((AlertDialog) dialog).getListView().setItemChecked(which, false); // Uncheck "Other"
+                        ((AlertDialog) dialog).getListView().setItemChecked(which, false);
                         dialog.dismiss(); 
                         showOtherRestrictionDialog();
                     } else {
@@ -219,7 +220,8 @@ public class CadastroActivity extends AppCompatActivity {
                 return;
             }
 
-            Usuario novoUsuario = new Usuario(nome, email, senha, finalRestrictions);
+            String hashedPassword = PasswordManager.hashPassword(senha);
+            Usuario novoUsuario = new Usuario(nome, email, hashedPassword, finalRestrictions);
             usuarioDAO.insertUsuario(novoUsuario);
 
             runOnUiThread(() -> {

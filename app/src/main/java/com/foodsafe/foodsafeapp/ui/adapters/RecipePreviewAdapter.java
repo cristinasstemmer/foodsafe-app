@@ -1,5 +1,6 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.model.Receita;
+import com.foodsafe.foodsafeapp.ui.dialogs.RecipeDetailDialog;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,8 +33,12 @@ public class RecipePreviewAdapter extends RecyclerView.Adapter<RecipePreviewAdap
         Receita recipe = recipeList.get(position);
         holder.tvRecipeName.setText(recipe.getNome());
 
-        Glide.with(holder.itemView.getContext())
-                .load(recipe.getImagemUrl())
+        Context context = holder.itemView.getContext();
+        String imageName = recipe.getImagemUri();
+        int resourceId = context.getResources().getIdentifier(imageName, "drawable", context.getPackageName());
+
+        Glide.with(context)
+                .load(resourceId)
                 .placeholder(R.drawable.ic_food_placeholder)
                 .error(R.drawable.ic_food_placeholder)
                 .into(holder.ivRecipeImage);

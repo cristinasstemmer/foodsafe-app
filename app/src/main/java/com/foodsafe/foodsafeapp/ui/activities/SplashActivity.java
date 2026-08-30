@@ -1,4 +1,4 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;

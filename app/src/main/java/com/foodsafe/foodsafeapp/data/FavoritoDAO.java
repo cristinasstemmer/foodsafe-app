@@ -21,6 +21,9 @@ public interface FavoritoDAO {
     @Query("SELECT * FROM Favorito WHERE idUsuario = :idUsuario")
     List<Favorito> getByUserId(int idUsuario);
 
+    @Query("SELECT idAlimento FROM Favorito WHERE idUsuario = :idUsuario")
+    LiveData<List<Integer>> getFavoriteFoodIds(int idUsuario);
+
     @Query("SELECT * FROM Favorito WHERE idUsuario = :idUsuario AND idAlimento = :idAlimento LIMIT 1")
     LiveData<Favorito> isFavorite(int idUsuario, int idAlimento);
 }

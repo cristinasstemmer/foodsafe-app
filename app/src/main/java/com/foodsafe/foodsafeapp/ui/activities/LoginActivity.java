@@ -1,4 +1,4 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +16,7 @@ import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.data.AppDatabase;
 import com.foodsafe.foodsafeapp.data.UsuarioDAO;
 import com.foodsafe.foodsafeapp.model.Usuario;
+import com.foodsafe.foodsafeapp.util.PasswordManager;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class LoginActivity extends AppCompatActivity {
@@ -47,13 +48,13 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             new Thread(() -> {
-                Usuario usuario = usuarioDAO.login(email, senha);
+                Usuario usuario = usuarioDAO.getUserByEmail(email);
                 runOnUiThread(() -> {
-                    if (usuario != null) {
+                    if (usuario != null && PasswordManager.checkPassword(senha, usuario.getSenha())) {
                         SharedPreferences prefs = getSharedPreferences("FoodSafePrefs", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putInt("USER_ID", usuario.getId());
-                        editor.commit();
+                        editor.apply();
 
                         Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);

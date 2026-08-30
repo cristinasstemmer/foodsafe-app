@@ -13,7 +13,7 @@ public class Alimento {
     private String nome;
     private List<String> contem_alergenos;
     private String descricao;
-    private String imagemUri; // pode ser URL ou URI local
+    private String imagemUri;
 
     public Alimento(String nome, List<String> contem_alergenos, String descricao, String imagemUri) {
         this.nome = nome;

@@ -1,5 +1,6 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.model.Receita;
+import com.foodsafe.foodsafeapp.ui.dialogs.RecipeDetailDialog;
+import com.foodsafe.foodsafeapp.ui.views.RecipeViewModel;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder> {
@@ -41,8 +46,12 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         holder.tvRecipeName.setText(recipe.getNome());
         holder.tvRecipeDescription.setText(recipe.getDescricao());
 
-        Glide.with(holder.itemView.getContext())
-                .load(recipe.getImagemUrl())
+        Context context = holder.itemView.getContext();
+        String imageName = recipe.getImagemUri();
+        int resourceId = context.getResources().getIdentifier(imageName, "drawable", context.getPackageName());
+
+        Glide.with(context)
+                .load(resourceId)
                 .placeholder(R.drawable.ic_food_placeholder)
                 .error(R.drawable.ic_food_placeholder)
                 .into(holder.ivRecipeImage);
@@ -88,49 +97,55 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         }
     }
 
-    public void filter(String query, List<String> dietaryPrefs, boolean safeOnly, List<String> userRestrictions, List<String> excludeAllergens) {
+    public void filter(String query, boolean safeOnly, List<String> userRestrictions, List<String> excludeAllergens) {
         List<Receita> filteredList = new ArrayList<>();
+        List<String> dietaryTags = Arrays.asList("vegan", "vegetarian", "gluten-free", "lactose-free");
 
         for (Receita recipe : recipesFull) {
-            String recipeRestrictions = recipe.getRestricoes() != null ? recipe.getRestricoes().toLowerCase() : "";
-
             // Text search filter
             boolean matchesQuery = query.isEmpty() || recipe.getNome().toLowerCase().contains(query.toLowerCase());
 
-            // Dietary preferences filter
-            boolean matchesDiet = true;
-            if (dietaryPrefs != null && !dietaryPrefs.isEmpty()) {
-                for (String pref : dietaryPrefs) {
-                    if (!recipeRestrictions.contains(pref.toLowerCase())) {
-                        matchesDiet = false;
-                        break;
+            // "Safe only" filter (based on user's own restrictions)
+            boolean isSafe = true;
+            if (safeOnly && userRestrictions != null && !userRestrictions.isEmpty()) {
+                List<String> recipeAllergens = recipe.getContem_alergenos();
+                if (recipeAllergens != null) {
+                    for (String userRestriction : userRestrictions) {
+                        if (recipeAllergens.stream().anyMatch(a -> a.equalsIgnoreCase(userRestriction))) {
+                            isSafe = false;
+                            break;
+                        }
                     }
                 }
             }
 
-            // "Safe only" filter
-            boolean isSafe = true;
-            if (safeOnly && userRestrictions != null && !userRestrictions.isEmpty()) {
-                for (String userRestriction : userRestrictions) {
-                    if (recipeRestrictions.contains(userRestriction.toLowerCase())) {
-                        isSafe = false;
-                        break;
-                    }
-                }
-            }
-            
-            // Temporary "Exclude allergens" filter
+            // Filter from modal (exclude allergens OR filter for dietary tags)
             boolean isExcluded = false;
             if (excludeAllergens != null && !excludeAllergens.isEmpty()) {
                 for (String exclusion : excludeAllergens) {
-                    if (recipeRestrictions.contains(exclusion.toLowerCase())) {
-                        isExcluded = true;
-                        break;
+                    String lowerCaseExclusion = exclusion.toLowerCase();
+
+                    if (dietaryTags.contains(lowerCaseExclusion)) {
+                        // This is a dietary tag, so we filter FOR it.
+                        // Exclude the recipe if it DOES NOT have the tag.
+                        String recipeDietaryTags = recipe.getRestricoes() != null ? recipe.getRestricoes().toLowerCase() : "";
+                        if (!recipeDietaryTags.contains(lowerCaseExclusion)) {
+                            isExcluded = true;
+                            break;
+                        }
+                    } else {
+                        // This is an allergen, so we filter it OUT.
+                        // Exclude the recipe if it CONTAINS the allergen.
+                        List<String> recipeAllergens = recipe.getContem_alergenos();
+                        if (recipeAllergens != null && recipeAllergens.stream().anyMatch(a -> a.equalsIgnoreCase(lowerCaseExclusion))) {
+                            isExcluded = true;
+                            break;
+                        }
                     }
                 }
             }
 
-            if (matchesQuery && matchesDiet && isSafe && !isExcluded) {
+            if (matchesQuery && isSafe && !isExcluded) {
                 filteredList.add(recipe);
             }
         }

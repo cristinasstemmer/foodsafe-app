@@ -5,9 +5,9 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.foodsafe.foodsafeapp.ui.FoodListFragment;
-import com.foodsafe.foodsafeapp.ui.HomeFragment;
-import com.foodsafe.foodsafeapp.ui.RecipesFragment;
+import com.foodsafe.foodsafeapp.ui.fragments.FoodListFragment;
+import com.foodsafe.foodsafeapp.ui.fragments.HomeFragment;
+import com.foodsafe.foodsafeapp.ui.fragments.RecipesFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {

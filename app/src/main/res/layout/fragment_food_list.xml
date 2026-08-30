@@ -2,7 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
 
     <LinearLayout
         android:id="@+id/ll_food_list_header"
@@ -40,8 +47,9 @@
             android:id="@+id/sv_search_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:queryHint="Search Food"
-            app:iconifiedByDefault="false" />
+            android:queryHint="Type here to search for foods"
+            app:iconifiedByDefault="false"
+            app:theme="@style/ThemeOverlay.AppCompat.Light" />
 
     </LinearLayout>
 

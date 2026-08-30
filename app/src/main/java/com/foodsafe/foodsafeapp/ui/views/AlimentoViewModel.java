@@ -1,4 +1,4 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.views;
 
 import android.app.Application;
 import android.content.Context;
@@ -7,18 +7,19 @@ import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 
 import com.foodsafe.foodsafeapp.data.AlimentoDAO;
 import com.foodsafe.foodsafeapp.data.AppDatabase;
 import com.foodsafe.foodsafeapp.model.Alimento;
 import com.foodsafe.foodsafeapp.model.Favorito;
 
+import java.util.Collections;
 import java.util.List;
 
 public class AlimentoViewModel extends AndroidViewModel {
 
-    private final LiveData<List<Alimento>> alimentos;
+    private final AlimentoDAO alimentoDAO;
     private final AppDatabase db;
     private final int usuarioId;
 
@@ -26,28 +27,27 @@ public class AlimentoViewModel extends AndroidViewModel {
         super(application);
 
         db = AppDatabase.getInstance(application);
+        alimentoDAO = db.alimentoDAO();
 
         SharedPreferences prefs =
                 application.getSharedPreferences("FoodSafePrefs", Context.MODE_PRIVATE);
 
         usuarioId = prefs.getInt("USER_ID", -1);
-
-        alimentos = db.alimentoDAO().getAllAlimentos();
     }
 
     public void update(Alimento alimento) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            db.alimentoDAO().update(alimento);
+            alimentoDAO.update(alimento);
         });
     }
 
     public LiveData<List<Alimento>> getAll() {
-        return alimentos;
+        return alimentoDAO.getAllAlimentos();
     }
 
     public void delete(Alimento alimento) {
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            db.alimentoDAO().delete(alimento);
+            alimentoDAO.delete(alimento);
         });
     }
 
@@ -68,28 +68,15 @@ public class AlimentoViewModel extends AndroidViewModel {
         });
     }
 
-    public LiveData<List<Alimento>> getFavorites(int userId) {
-        MutableLiveData<List<Alimento>> favoritos = new MutableLiveData<>();
+    public LiveData<List<Alimento>> getFavoriteAlimentos() {
+        LiveData<List<Integer>> favoriteFoodIds = db.favoritoDAO().getFavoriteFoodIds(usuarioId);
 
-        AppDatabase.databaseWriteExecutor.execute(() -> {
-
-            List<Favorito> listaFavoritos = db.favoritoDAO().getByUserId(userId);
-
-            List<Integer> ids = listaFavoritos.stream()
-                    .map(Favorito::getIdAlimento)
-                    .toList();
-
-            if (ids.isEmpty()) {
-                favoritos.postValue(List.of());
-                return;
+        return Transformations.switchMap(favoriteFoodIds, ids -> {
+            if (ids == null || ids.isEmpty()) {
+                return new LiveData<List<Alimento>>(Collections.emptyList()) {};
             }
-
-            List<Alimento> alimentosFav = db.alimentoDAO().getByIds(ids);
-
-            favoritos.postValue(alimentosFav);
+            return alimentoDAO.getByIdsAsLiveData(ids);
         });
-
-        return favoritos;
     }
 
     public LiveData<Favorito> isFavorite(int alimentoId) {

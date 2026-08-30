@@ -2,6 +2,11 @@ package com.foodsafe.foodsafeapp.model;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import com.foodsafe.foodsafeapp.data.Converters;
+
+import java.util.List;
 
 @Entity(tableName = "receitas")
 public class Receita {
@@ -14,18 +19,21 @@ public class Receita {
     private String ingredientes;
     private String modoPreparo;
     private String restricoes;
-    private String imagemUrl;
+    private String imagemUri;
 
-    public Receita(String nome, String descricao, String ingredientes, String modoPreparo, String restricoes, String imagemUrl) {
+    @TypeConverters(Converters.class)
+    private List<String> contem_alergenos;
+
+    public Receita(String nome, String descricao, String ingredientes, String modoPreparo, String restricoes, String imagemUri, List<String> contem_alergenos) {
         this.nome = nome;
         this.descricao = descricao;
         this.ingredientes = ingredientes;
         this.modoPreparo = modoPreparo;
         this.restricoes = restricoes;
-        this.imagemUrl = imagemUrl;
+        this.imagemUri = imagemUri;
+        this.contem_alergenos = contem_alergenos;
     }
 
-    // Getters e Setters
 
     public int getId() {
         return id;
@@ -75,11 +83,19 @@ public class Receita {
         this.restricoes = restricoes;
     }
 
-    public String getImagemUrl() {
-        return imagemUrl;
+    public String getImagemUri() {
+        return imagemUri;
     }
 
-    public void setImagemUrl(String imagemUrl) {
-        this.imagemUrl = imagemUrl;
+    public void setImagemUri(String imagemUri) {
+        this.imagemUri = imagemUri;
+    }
+
+    public List<String> getContem_alergenos() {
+        return contem_alergenos;
+    }
+
+    public void setContem_alergenos(List<String> contem_alergenos) {
+        this.contem_alergenos = contem_alergenos;
     }
 }

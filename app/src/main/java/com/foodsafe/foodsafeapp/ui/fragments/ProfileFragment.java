@@ -1,4 +1,4 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.fragments;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,6 +23,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+
+import com.foodsafe.foodsafeapp.ui.activities.LoginActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import com.foodsafe.foodsafeapp.R;
@@ -101,12 +103,11 @@ public class ProfileFragment extends BottomSheetDialogFragment {
         ivBack.setOnClickListener(v -> dismiss());
         btnEditRestrictions.setOnClickListener(v -> {
             if (currentUser != null) {
-                // Initialize a temporary list to hold changes for this editing session
                 tempSelectedRestrictions = new ArrayList<>();
                 if (currentUser.getRestricoes() != null) {
                     tempSelectedRestrictions.addAll(currentUser.getRestricoes());
                 }
-                showRestrictionsDialog(); // Start the dialog process
+                showRestrictionsDialog();
             }
         });
         llChangePassword.setOnClickListener(v -> {
@@ -168,7 +169,6 @@ public class ProfileFragment extends BottomSheetDialogFragment {
     }
 
     private void showRestrictionsDialog() {
-        // 1. Build the list of items to display
         List<String> displayableRestrictions = new ArrayList<>(Arrays.asList(Restrictions.ALL_RESTRICTIONS));
         for (String restriction : tempSelectedRestrictions) {
             if (!displayableRestrictions.contains(restriction)) {
@@ -181,12 +181,10 @@ public class ProfileFragment extends BottomSheetDialogFragment {
         final String[] items = displayableRestrictions.toArray(new String[0]);
         boolean[] checkedItems = new boolean[items.length];
 
-        // 2. Set the checked state based on tempSelectedRestrictions
         for (int i = 0; i < items.length; i++) {
             checkedItems[i] = tempSelectedRestrictions.contains(items[i]);
         }
 
-        // 3. Create and show the dialog
         new AlertDialog.Builder(requireContext())
                 .setTitle("Select Dietary Restrictions")
                 .setMultiChoiceItems(items, checkedItems, (dialog, which, isChecked) -> {

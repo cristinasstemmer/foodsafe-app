@@ -40,4 +40,7 @@ public interface AlimentoDAO {
 
     @Query("SELECT * FROM alimento WHERE id IN (:ids)")
     List<Alimento> getByIds(List<Integer> ids);
+
+    @Query("SELECT * FROM alimento WHERE id IN (:foodIds)")
+    LiveData<List<Alimento>> getByIdsAsLiveData(List<Integer> foodIds);
 }

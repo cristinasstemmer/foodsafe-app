@@ -1,4 +1,4 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,19 +14,16 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.foodsafe.foodsafeapp.R;
-import com.foodsafe.foodsafeapp.model.Usuario;
+import com.foodsafe.foodsafeapp.ui.FilterListener;
 import com.foodsafe.foodsafeapp.util.Restrictions;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,12 +31,21 @@ import java.util.Map;
 public class FilterModalFragment extends BottomSheetDialogFragment {
 
     private FilterListener filterListener;
-    private UsuarioViewModel usuarioViewModel;
-    private ChipGroup chipGroup;
     private SwitchMaterial switchSafe;
     private AutoCompleteTextView etExcludeAllergens;
-    private Usuario currentUser;
     private final List<String> selectedExclusions = new ArrayList<>();
+
+    private static final String ARG_INITIAL_SAFE_ONLY = "initial_safe_only";
+    private static final String ARG_INITIAL_EXCLUSIONS = "initial_exclusions";
+
+    public static FilterModalFragment newInstance(boolean initialSafeOnly, List<String> initialExclusions) {
+        FilterModalFragment fragment = new FilterModalFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(ARG_INITIAL_SAFE_ONLY, initialSafeOnly);
+        args.putSerializable(ARG_INITIAL_EXCLUSIONS, (Serializable) initialExclusions);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -48,6 +54,8 @@ public class FilterModalFragment extends BottomSheetDialogFragment {
             filterListener = (FilterListener) context;
         } else if (getParentFragment() instanceof FilterListener) {
             filterListener = (FilterListener) getParentFragment();
+        } else {
+            throw new RuntimeException(context.toString() + " must implement FilterListener");
         }
     }
 
@@ -61,7 +69,6 @@ public class FilterModalFragment extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        chipGroup = view.findViewById(R.id.chip_group_dietary);
         switchSafe = view.findViewById(R.id.switch_only_safe);
         etExcludeAllergens = view.findViewById(R.id.et_exclude_allergens);
         TextInputLayout tilExcludeAllergens = view.findViewById(R.id.til_exclude_allergens);
@@ -69,14 +76,15 @@ public class FilterModalFragment extends BottomSheetDialogFragment {
         Button btnClear = view.findViewById(R.id.btn_clear_filters);
         ImageView ivClose = view.findViewById(R.id.iv_close_modal);
 
-        usuarioViewModel = new ViewModelProvider(requireActivity()).get(UsuarioViewModel.class);
-
-        usuarioViewModel.getLoggedUser().observe(getViewLifecycleOwner(), usuario -> {
-            if (usuario != null) {
-                currentUser = usuario;
-                setupInitialState(usuario.getRestricoes());
+        if (getArguments() != null) {
+            boolean initialSafeOnly = getArguments().getBoolean(ARG_INITIAL_SAFE_ONLY, false);
+            List<String> initialExclusions = (List<String>) getArguments().getSerializable(ARG_INITIAL_EXCLUSIONS);
+            switchSafe.setChecked(initialSafeOnly);
+            if (initialExclusions != null) {
+                selectedExclusions.addAll(initialExclusions);
+                updateExcludeAllergensText();
             }
-        });
+        }
 
         etExcludeAllergens.setOnClickListener(v -> showExcludeDialog());
         tilExcludeAllergens.setEndIconOnClickListener(v -> showExcludeDialog());
@@ -84,9 +92,9 @@ public class FilterModalFragment extends BottomSheetDialogFragment {
         ivClose.setOnClickListener(v -> dismiss());
 
         btnClear.setOnClickListener(v -> {
-            chipGroup.clearCheck();
             selectedExclusions.clear();
             updateExcludeAllergensText();
+            switchSafe.setChecked(false);
             if (filterListener != null) {
                 filterListener.onFiltersCleared();
             }
@@ -94,36 +102,12 @@ public class FilterModalFragment extends BottomSheetDialogFragment {
         });
 
         btnApply.setOnClickListener(v -> {
-            if (currentUser != null) {
-                // Note: We don't save the temporary exclusions to the user's profile
-                if (filterListener != null) {
-                    Map<String, Object> currentFilters = collectCurrentFilters();
-                    filterListener.onFiltersApplied(currentFilters);
-                }
+            if (filterListener != null) {
+                Map<String, Object> currentFilters = collectCurrentFilters();
+                filterListener.onFiltersApplied(currentFilters);
             }
             dismiss();
         });
-    }
-
-    private void setupInitialState(List<String> restrictions) {
-        if (restrictions == null) return;
-        for (int i = 0; i < chipGroup.getChildCount(); i++) {
-            Chip chip = (Chip) chipGroup.getChildAt(i);
-            if (restrictions.contains(chip.getText().toString())) {
-                chip.setChecked(true);
-            }
-        }
-    }
-
-    private List<String> getSelectedChipTexts() {
-        List<String> selectedTexts = new ArrayList<>();
-        for (int id : chipGroup.getCheckedChipIds()) {
-            Chip chip = chipGroup.findViewById(id);
-            if (chip != null) {
-                selectedTexts.add(chip.getText().toString());
-            }
-        }
-        return selectedTexts;
     }
 
     private void showExcludeDialog() {
@@ -134,11 +118,13 @@ public class FilterModalFragment extends BottomSheetDialogFragment {
         }
 
         new AlertDialog.Builder(getContext())
-                .setTitle("Select allergens to exclude")
+                .setTitle("Select items to exclude")
                 .setMultiChoiceItems(items, checkedItems, (dialog, which, isChecked) -> {
                     String selected = items[which];
                     if (isChecked) {
-                        selectedExclusions.add(selected);
+                        if (!selectedExclusions.contains(selected)) {
+                            selectedExclusions.add(selected);
+                        }
                     } else {
                         selectedExclusions.remove(selected);
                     }
@@ -159,9 +145,8 @@ public class FilterModalFragment extends BottomSheetDialogFragment {
     private Map<String, Object> collectCurrentFilters() {
         Map<String, Object> filters = new HashMap<>();
         filters.put("safe_only", switchSafe.isChecked());
-        filters.put("dietary_preferences", getSelectedChipTexts());
-        filters.put("exclude_allergens", new ArrayList<>(selectedExclusions)); // Pass a copy
-        Log.d("FilterModal", "Filtros coletados: " + filters);
+        filters.put("exclude_allergens", new ArrayList<>(selectedExclusions));
+        Log.d("FilterModal", "Collected filters: " + filters);
         return filters;
     }
 

@@ -25,6 +25,15 @@
     <style name="Theme.FoodSafe.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="Theme.FoodSafe.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <!-- Custom Dialog Style -->
+    <style name="FoodSafeDialogTheme" parent="ThemeOverlay.Material3.Dialog.Alert">
+        <item name="buttonBarPositiveButtonStyle">@style/DialogPositiveButton</item>
+    </style>
+
+    <style name="DialogPositiveButton" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
     <style name="ChipStyle" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:minHeight">32dp</item>
         <item name="android:textSize">14sp</item>

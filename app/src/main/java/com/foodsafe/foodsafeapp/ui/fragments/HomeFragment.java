@@ -1,4 +1,4 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,6 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.foodsafe.foodsafeapp.R;
+import com.foodsafe.foodsafeapp.ui.adapters.FoodPreviewAdapter;
+import com.foodsafe.foodsafeapp.ui.views.HomeViewModel;
+import com.foodsafe.foodsafeapp.ui.adapters.RecipePreviewAdapter;
 
 public class HomeFragment extends Fragment {
 

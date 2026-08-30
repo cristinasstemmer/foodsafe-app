@@ -18,8 +18,8 @@ import com.foodsafe.foodsafeapp.model.Usuario;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {Usuario.class, Alimento.class, Receita.class, Favorito.class, FavoritoReceita.class}, version = 21, exportSchema = false)
-@TypeConverters({StringListConverter.class})
+@Database(entities = {Usuario.class, Alimento.class, Receita.class, Favorito.class, FavoritoReceita.class}, version = 29, exportSchema = false)
+@TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDAO usuarioDAO();

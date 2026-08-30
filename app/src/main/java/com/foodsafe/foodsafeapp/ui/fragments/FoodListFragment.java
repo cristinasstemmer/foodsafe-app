@@ -1,9 +1,7 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.fragments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +25,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.data.AppDatabase;
 import com.foodsafe.foodsafeapp.model.Alimento;
+import com.foodsafe.foodsafeapp.ui.adapters.AlimentoAdapter;
+import com.foodsafe.foodsafeapp.ui.views.AlimentoViewModel;
+import com.foodsafe.foodsafeapp.ui.FilterListener;
+import com.foodsafe.foodsafeapp.ui.views.UsuarioViewModel;
+import com.foodsafe.foodsafeapp.ui.dialogs.AddAlimentoDialog;
+import com.foodsafe.foodsafeapp.ui.dialogs.EditAlimentoDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,10 +52,17 @@ public class FoodListFragment extends Fragment implements FilterListener {
     private ActivityResultLauncher<String[]> imagePickerLauncher;
 
     private String currentQuery = "";
-    private List<String> currentDietaryPrefs = new ArrayList<>();
     private boolean currentSafeOnly = false;
     private List<String> currentExcludeAllergens = new ArrayList<>();
     private List<String> currentUserRestrictions = new ArrayList<>();
+
+    private LiveData<List<Alimento>> currentDataSource;
+    private final Observer<List<Alimento>> listObserver = alimentos -> {
+        if (adapter != null) {
+            adapter.setList(alimentos);
+            applyAllFilters();
+        }
+    };
 
     public FoodListFragment() {}
 
@@ -86,10 +99,11 @@ public class FoodListFragment extends Fragment implements FilterListener {
         usuarioViewModel = new ViewModelProvider(requireActivity()).get(UsuarioViewModel.class);
 
         setupRecycler();
-        observeData();
         setupSearch();
         setupToolbar(toolbar);
         observeUser();
+
+        switchDataSource(false);
 
         return view;
     }
@@ -102,14 +116,13 @@ public class FoodListFragment extends Fragment implements FilterListener {
                 return true;
             } else if (itemId == R.id.action_favorites) {
                 showingFavorites = !showingFavorites;
+                switchDataSource(showingFavorites);
                 if (showingFavorites) {
                     item.setIcon(R.drawable.ic_favorite_filled);
                     tvFavoritesTitle.setVisibility(View.VISIBLE);
-                    alimentoViewModel.getFavorites(alimentoViewModel.getUserId()).observe(getViewLifecycleOwner(), adapter::setList);
                 } else {
                     item.setIcon(R.drawable.ic_favorite);
                     tvFavoritesTitle.setVisibility(View.GONE);
-                    observeData();
                 }
                 return true;
             } else if (itemId == R.id.action_filter) {
@@ -118,6 +131,20 @@ public class FoodListFragment extends Fragment implements FilterListener {
             }
             return false;
         });
+    }
+
+    private void switchDataSource(boolean showFavorites) {
+        if (currentDataSource != null) {
+            currentDataSource.removeObserver(listObserver);
+        }
+
+        if (showFavorites) {
+            currentDataSource = alimentoViewModel.getFavoriteAlimentos();
+        } else {
+            currentDataSource = alimentoViewModel.getAll();
+        }
+
+        currentDataSource.observe(getViewLifecycleOwner(), listObserver);
     }
 
     private void setupSearch() {
@@ -140,7 +167,7 @@ public class FoodListFragment extends Fragment implements FilterListener {
 
     private void applyAllFilters() {
         if (adapter != null) {
-            adapter.filter(currentQuery, currentDietaryPrefs, currentSafeOnly, currentUserRestrictions, currentExcludeAllergens);
+            adapter.filter(currentQuery, currentSafeOnly, currentUserRestrictions, currentExcludeAllergens);
         }
     }
 
@@ -149,13 +176,6 @@ public class FoodListFragment extends Fragment implements FilterListener {
         rvFoodItems.setLayoutManager(new GridLayoutManager(getContext(), columnCount));
         adapter = new AlimentoAdapter(alimentoViewModel, getViewLifecycleOwner(), this, tvNoResults);
         rvFoodItems.setAdapter(adapter);
-    }
-
-    private void observeData() {
-        alimentoViewModel.getAll().observe(getViewLifecycleOwner(), alimentos -> {
-            adapter.setList(alimentos);
-            applyAllFilters();
-        });
     }
 
     private void observeUser() {
@@ -182,8 +202,8 @@ public class FoodListFragment extends Fragment implements FilterListener {
     }
 
     private void openFilterModal() {
-        FilterModalFragment filterModal = new FilterModalFragment();
-        filterModal.show(getParentFragmentManager(), filterModal.getTag());
+        FilterModalFragment filterModal = FilterModalFragment.newInstance(currentSafeOnly, currentExcludeAllergens);
+        filterModal.show(getChildFragmentManager(), filterModal.getTag());
     }
 
     public void openEditFoodModal(Alimento alimento) {
@@ -216,7 +236,6 @@ public class FoodListFragment extends Fragment implements FilterListener {
     @Override
     public void onFiltersApplied(Map<String, Object> filters) {
         currentSafeOnly = (boolean) filters.getOrDefault("safe_only", false);
-        currentDietaryPrefs = (List<String>) filters.getOrDefault("dietary_preferences", new ArrayList<>());
         currentExcludeAllergens = (List<String>) filters.getOrDefault("exclude_allergens", new ArrayList<>());
         applyAllFilters();
     }
@@ -224,7 +243,6 @@ public class FoodListFragment extends Fragment implements FilterListener {
     @Override
     public void onFiltersCleared() {
         currentSafeOnly = false;
-        currentDietaryPrefs.clear();
         currentExcludeAllergens.clear();
         if (svSearchBar != null) {
             svSearchBar.setQuery("", false);

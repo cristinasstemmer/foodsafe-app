@@ -1,4 +1,4 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.activities;
 
 import android.os.Bundle;
 import android.widget.ArrayAdapter;

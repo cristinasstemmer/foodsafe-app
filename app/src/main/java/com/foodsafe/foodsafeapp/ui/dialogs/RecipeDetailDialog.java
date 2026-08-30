@@ -1,4 +1,4 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.dialogs;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.foodsafe.foodsafeapp.R;
@@ -29,10 +30,8 @@ public class RecipeDetailDialog {
         tvIngredients.setText("Ingredients: \n" + receita.getIngredientes());
         tvInstructions.setText("Instructions: \n" + receita.getModoPreparo());
 
-        builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
-
         AlertDialog dialog = builder.create();
-        dialog.show();
+
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));

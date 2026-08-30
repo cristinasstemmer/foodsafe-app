@@ -1,7 +1,6 @@
-package com.foodsafe.foodsafeapp.ui;
+package com.foodsafe.foodsafeapp.ui.dialogs;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.text.InputFilter;
 import android.text.TextUtils;
@@ -11,11 +10,14 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
+import com.bumptech.glide.Glide;
 import com.foodsafe.foodsafeapp.R;
 import com.foodsafe.foodsafeapp.model.Alimento;
 import com.foodsafe.foodsafeapp.util.Restrictions;
@@ -29,46 +31,87 @@ import java.util.stream.Collectors;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class AddAlimentoDialog {
+public class EditAlimentoDialog {
 
-    private final Context context;
-    private final BottomSheetDialog dialog;
-    private final List<String> selectedRestrictions = new ArrayList<>();
-    private AutoCompleteTextView etAlergenos;
-    private CircleImageView ivFoodImage;
-    private Uri imageUri;
-
-    public interface AddAlimentoCallback {
-        void onAlimentoCriado(Alimento alimento);
+    public interface OnAlimentoEditedListener {
+        void onAlimentoEdited(Alimento alimento);
     }
 
-    public AddAlimentoDialog(Context context, ActivityResultLauncher<String[]> imagePickerLauncher, AddAlimentoCallback callback) {
-        this.context = context;
-        this.dialog = new BottomSheetDialog(context);
+    private final Alimento alimentoParaEditar;
+    private final OnAlimentoEditedListener listener;
+    private final Context context;
+    private final BottomSheetDialog dialog;
 
+    private EditText etFoodName, etFoodDesc;
+    private AutoCompleteTextView etFoodAlergenos;
+    private Button btnSave;
+    private TextView tvTitle;
+    private CircleImageView ivFoodImage;
+    private ImageView ivAddPhoto;
+    private Uri imageUri;
+    private final List<String> selectedRestrictions = new ArrayList<>();
+
+    public EditAlimentoDialog(@NonNull Context context, Alimento alimento, ActivityResultLauncher<String[]> imagePickerLauncher, OnAlimentoEditedListener listener) {
+        this.context = context;
+        this.alimentoParaEditar = alimento;
+        this.listener = listener;
+
+        this.dialog = new BottomSheetDialog(context);
         View view = LayoutInflater.from(context).inflate(R.layout.modal_add_food, null);
         dialog.setContentView(view);
 
+        initializeViews(view);
+        setupFields();
+        setupClickListener(view, imagePickerLauncher);
+    }
+
+    private void initializeViews(View view) {
+        tvTitle = view.findViewById(R.id.tv_modal_title);
+        etFoodName = view.findViewById(R.id.et_food_name);
+        etFoodAlergenos = view.findViewById(R.id.et_food_alergenos);
+        etFoodDesc = view.findViewById(R.id.et_food_desc);
+        btnSave = view.findViewById(R.id.btn_continue);
         ivFoodImage = view.findViewById(R.id.iv_food_image);
-        ImageView ivAddPhoto = view.findViewById(R.id.iv_add_photo);
-        EditText etNome = view.findViewById(R.id.et_food_name);
-        etAlergenos = view.findViewById(R.id.et_food_alergenos);
-        TextInputLayout tilAlergenos = view.findViewById(R.id.til_food_alergenos);
-        EditText etDescricao = view.findViewById(R.id.et_food_desc);
-        Button btnAdd = view.findViewById(R.id.btn_continue);
+        ivAddPhoto = view.findViewById(R.id.iv_add_photo);
+    }
+
+    private void setupFields() {
+        tvTitle.setText("Edit Food");
+        btnSave.setText("Save Changes");
+
+        if (alimentoParaEditar != null) {
+            etFoodName.setText(alimentoParaEditar.getNome());
+            etFoodDesc.setText(alimentoParaEditar.getDescricao());
+
+            if (alimentoParaEditar.getImagemUri() != null && !alimentoParaEditar.getImagemUri().isEmpty()) {
+                imageUri = Uri.parse(alimentoParaEditar.getImagemUri());
+                setImageUri(imageUri);
+            } else {
+                ivFoodImage.setImageResource(R.drawable.ic_food_placeholder);
+            }
+
+            if (alimentoParaEditar.getContem_alergenos() != null) {
+                selectedRestrictions.addAll(alimentoParaEditar.getContem_alergenos());
+            }
+            updateSelectedRestrictionsText();
+        }
+    }
+
+    private void setupClickListener(View view, ActivityResultLauncher<String[]> imagePickerLauncher) {
+        TextInputLayout tilFoodAlergenos = view.findViewById(R.id.til_food_alergenos);
 
         ivAddPhoto.setOnClickListener(v -> imagePickerLauncher.launch(new String[]{"image/*"}));
 
-        etAlergenos.setOnClickListener(v -> showRestrictionsDialog());
-        tilAlergenos.setEndIconOnClickListener(v -> showRestrictionsDialog());
+        etFoodAlergenos.setOnClickListener(v -> showRestrictionsDialog());
+        tilFoodAlergenos.setEndIconOnClickListener(v -> showRestrictionsDialog());
 
-        btnAdd.setOnClickListener(v -> {
-            String nome = etNome.getText().toString().trim();
-            String desc = etDescricao.getText().toString().trim();
-            String imagem = (imageUri != null) ? imageUri.toString() : "";
+        btnSave.setOnClickListener(v -> {
+            String nome = etFoodName.getText().toString().trim();
+            String desc = etFoodDesc.getText().toString().trim();
+            String image = (imageUri != null) ? imageUri.toString() : "";
 
             if (nome.isEmpty()) {
-                Toast.makeText(context, "Please enter the food name!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Food name cannot be empty.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -78,21 +121,23 @@ public class AddAlimentoDialog {
                     .distinct()
                     .collect(Collectors.toList());
 
-            Alimento alimento = new Alimento(
-                    nome,
-                    finalRestrictions,
-                    desc,
-                    imagem
-            );
+            alimentoParaEditar.setNome(nome);
+            alimentoParaEditar.setContem_alergenos(finalRestrictions);
+            alimentoParaEditar.setDescricao(desc);
+            alimentoParaEditar.setImagemUri(image);
 
-            callback.onAlimentoCriado(alimento);
+            listener.onAlimentoEdited(alimentoParaEditar);
             dialog.dismiss();
         });
     }
 
     public void setImageUri(Uri imageUri) {
         this.imageUri = imageUri;
-        ivFoodImage.setImageURI(imageUri);
+        Glide.with(context)
+                .load(imageUri)
+                .placeholder(R.drawable.ic_food_placeholder)
+                .error(R.drawable.ic_food_placeholder)
+                .into(ivFoodImage);
     }
 
     public boolean isShowing() {
@@ -131,9 +176,7 @@ public class AddAlimentoDialog {
                         }
                     }
                 })
-                .setPositiveButton("OK", (dialog, which) -> {
-                    updateSelectedRestrictionsText();
-                })
+                .setPositiveButton("OK", (dialog, which) -> updateSelectedRestrictionsText())
                 .setNegativeButton("Cancel", null)
                 .show();
     }
@@ -167,12 +210,12 @@ public class AddAlimentoDialog {
                 .collect(Collectors.toList());
 
         if (cleanedList.isEmpty()) {
-            etAlergenos.setText("");
+            etFoodAlergenos.setText("");
         } else {
-            etAlergenos.setText(TextUtils.join(", ", cleanedList));
+            etFoodAlergenos.setText(TextUtils.join(", ", cleanedList));
         }
     }
-
+    
     public void show() {
         dialog.show();
     }
